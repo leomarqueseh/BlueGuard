@@ -42,4 +42,4 @@ A ferramenta segue os princípios da **LGPD**, especialmente:
 - Responsabilização
 
 
-O uso indevido é de inteira responsabilidade do operador.ra responsabilidade do operador.
+O uso indevido é de inteira responsabilidade do operador.
