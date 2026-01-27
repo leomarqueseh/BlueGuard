@@ -1,6 +1,3 @@
----
-
-
 ## 🚧 Status do Desenvolvimento
 
 
@@ -12,10 +9,6 @@ As funcionalidades atuais estão focadas em:
 - Descoberta de ativos autorizados
 - Validação de hosts ativos
 - Identificação de portas e serviços
-
-
-Módulos de análise de vulnerabilidades, exploração controlada e dashboard
-web serão implementados nas próximas fases.
 
 
 ---
@@ -42,12 +35,11 @@ O BlueGuard deve ser utilizado **exclusivamente em ativos e ambientes
 para os quais o usuário possua autorização formal**.
 
 
-A ferramenta não realiza coleta intencional de dados pessoais e segue
-os princípios da **LGPD**, especialmente:
+A ferramenta segue os princípios da **LGPD**, especialmente:
 - Segurança
 - Prevenção
 - Minimização de dados
 - Responsabilização
 
 
-O uso indevido da ferramenta é de inteira responsabilidade do operador.
+O uso indevido é de inteira responsabilidade do operador.ra responsabilidade do operador.
