@@ -1,8 +1,3 @@
-Perfeito. Abaixo está um README.md COMPLETO, ATUALIZADO e PRONTO PARA O GITHUB, documentando tudo o que existe hoje no BlueGuard, com flags, exemplos reais, estrutura, boas práticas e status do projeto.
-
-👉 Você pode copiar e colar diretamente como README.md na raiz do repositório.
-
-⸻
 
 🛡️ BlueGuard
 
