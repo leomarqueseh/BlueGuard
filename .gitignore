@@ -1,17 +1,67 @@
-# Binários
+# =====================
+# GO
+# =====================
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Binaries
 blueguard
 
-# Outputs
-outputs/
+# Go workspace
+/go.work
+/go.work.sum
+
+# =====================
+# BUILD / CACHE
+# =====================
+/bin/
+/dist/
+/build/
+/vendor/
+
+# Go cache (local)
+*.tmp
 *.log
 
-# Go
-/vendor/
-/bin/
+# =====================
+# OUTPUTS / SCANS
+# =====================
+outputs/
+results/
+*.json
+*.yaml.out
+*.report
 
-# IDE
+# =====================
+# IDE / EDITOR
+# =====================
 .vscode/
 .idea/
+*.swp
+*.swo
+*.bak
 
+# =====================
 # OS
+# =====================
 .DS_Store
+Thumbs.db
+
+# =====================
+# SECURITY / TOKENS
+# =====================
+.env
+.env.*
+*.key
+*.pem
+*.crt
+
+# =====================
+# GIT
+# =====================
+*.orig
