@@ -1,0 +1,19 @@
+id: vercel
+provider: Vercel
+severity: high
+
+cname:
+  - vercel.app
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - DEPLOYMENT_NOT_FOUND
+
+  negative:
+    - type: body
+      words:
+        - Authentication Required

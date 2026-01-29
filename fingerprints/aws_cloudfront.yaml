@@ -1,0 +1,19 @@
+id: aws-cloudfront
+provider: AWS CloudFront
+severity: high
+
+cname:
+  - cloudfront.net
+
+http:
+  status: [403,404]
+
+  matchers:
+    - type: body
+      words:
+        - ERROR: The request could not be satisfied
+
+  negative:
+    - type: body
+      words:
+        - Bad request

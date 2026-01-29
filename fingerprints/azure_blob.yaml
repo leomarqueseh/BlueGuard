@@ -1,0 +1,19 @@
+id: azure-blob
+provider: Azure Blob
+severity: high
+
+cname:
+  - blob.core.windows.net
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - The specified resource does not exist
+
+  negative:
+    - type: body
+      words:
+        - AuthenticationFailed

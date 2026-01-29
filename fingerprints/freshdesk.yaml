@@ -1,0 +1,19 @@
+id: freshdesk
+provider: Freshdesk
+severity: high
+
+cname:
+  - freshdesk.com
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - There is no helpdesk here
+
+  negative:
+    - type: body
+      words:
+        - Freshdesk

@@ -1,0 +1,19 @@
+id: heroku
+provider: Heroku
+severity: high
+
+cname:
+  - herokuapp.com
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - No such app
+
+  negative:
+    - type: body
+      words:
+        - Heroku | Welcome

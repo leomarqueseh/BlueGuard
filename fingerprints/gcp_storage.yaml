@@ -1,0 +1,19 @@
+id: gcp-storage
+provider: Google Cloud Storage
+severity: high
+
+cname:
+  - storage.googleapis.com
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - No such bucket
+
+  negative:
+    - type: body
+      words:
+        - AccessDenied

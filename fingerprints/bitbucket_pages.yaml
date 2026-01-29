@@ -1,0 +1,19 @@
+id: bitbucket-pages
+provider: Bitbucket Pages
+severity: high
+
+cname:
+  - bitbucket.io
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - Repository not found
+
+  negative:
+    - type: body
+      words:
+        - Forbidden

@@ -1,0 +1,5 @@
+blog.example.com
+cdn.example.com
+static.example.com
+http://old.example.com
+https://dev.example.com

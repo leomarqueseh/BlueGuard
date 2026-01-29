@@ -1,0 +1,19 @@
+id: netlify
+provider: Netlify
+severity: high
+
+cname:
+  - netlify.app
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - Not Found - Request ID
+
+  negative:
+    - type: body
+      words:
+        - Page Not Found

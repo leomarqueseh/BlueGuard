@@ -1,0 +1,20 @@
+id: aws-s3
+provider: AWS S3
+severity: high
+
+cname:
+  - amazonaws.com
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - NoSuchBucket
+        - The specified bucket does not exist
+
+  negative:
+    - type: body
+      words:
+        - AccessDenied

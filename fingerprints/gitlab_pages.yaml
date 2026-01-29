@@ -1,0 +1,19 @@
+id: gitlab-pages
+provider: GitLab Pages
+severity: high
+
+cname:
+  - gitlab.io
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - GitLab Pages
+
+  negative:
+    - type: body
+      words:
+        - Project not found

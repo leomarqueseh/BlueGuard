@@ -1,0 +1,20 @@
+id: github-pages
+provider: GitHub Pages
+severity: high
+
+cname:
+  - github.io
+
+http:
+  status:
+    - 404
+
+  matchers:
+    - type: body
+      words:
+        - There isn't a GitHub Pages site here.
+
+  negative:
+    - type: body
+      words:
+        - Repository not found

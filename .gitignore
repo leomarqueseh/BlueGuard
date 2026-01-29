@@ -1,0 +1,17 @@
+# Binários
+blueguard
+
+# Outputs
+outputs/
+*.log
+
+# Go
+/vendor/
+/bin/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

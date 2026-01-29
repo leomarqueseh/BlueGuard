@@ -1,0 +1,19 @@
+id: fastly
+provider: Fastly
+severity: high
+
+cname:
+  - fastly.net
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - Fastly error: unknown domain
+
+  negative:
+    - type: body
+      words:
+        - 403 Forbidden

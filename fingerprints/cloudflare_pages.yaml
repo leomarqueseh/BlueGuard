@@ -1,0 +1,19 @@
+id: cloudflare-pages
+provider: Cloudflare Pages
+severity: high
+
+cname:
+  - pages.dev
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - Project not found
+
+  negative:
+    - type: body
+      words:
+        - Access denied

@@ -1,0 +1,19 @@
+id: azure-webapp
+provider: Azure Web App
+severity: high
+
+cname:
+  - azurewebsites.net
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - Web App not found
+
+  negative:
+    - type: body
+      words:
+        - Azure

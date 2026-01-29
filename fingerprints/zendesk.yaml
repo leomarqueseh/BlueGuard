@@ -1,0 +1,19 @@
+id: zendesk
+provider: Zendesk
+severity: high
+
+cname:
+  - zendesk.com
+
+http:
+  status: [404]
+
+  matchers:
+    - type: body
+      words:
+        - Help Center Closed
+
+  negative:
+    - type: body
+      words:
+        - Zendesk Support
