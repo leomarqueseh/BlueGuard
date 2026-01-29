@@ -21,7 +21,7 @@ Inspirado em **Nuclei**, **Nessus** e **Burp Suite**, porém com **engine própr
 
 ## 🎯 Objetivos do Projeto
 
-- Subdomain Takeover **100% confiável**
+- Subdomain Takeover **confiável**
 - Arquitetura extensível (**YAML + Go**)
 - Execução rápida e silenciosa (**PASSIVE-LITE**)
 - Evolução planejada para:
