@@ -1,54 +1,62 @@
+🛡️ BlueGuard – Automated Vulnerability Scanner
 
-🛡️ BlueGuard
+BlueGuard é um framework modular de segurança ofensiva, escrito em Go, focado em alta confiabilidade, zero false positive e evolução contínua para cobrir Subdomain Takeover, Fuzzing e OWASP Top 10 (2021 + 2025).
 
-BlueGuard é um framework de segurança ofensiva escrito em Go, focado inicialmente em Subdomain Takeover altamente confiável, com evolução planejada para OWASP Top 10, fuzzing inteligente e dashboard web estilo Nessus.
-
-🎯 Objetivo: zero false positive, alta confiabilidade e extensibilidade via templates YAML e scripts customizados.
+Inspirado em ferramentas como Nuclei, Nessus e Burp, porém com engine própria, fingerprints em YAML e controle total do fluxo.
 
 ⸻
 
-🚀 Funcionalidades atuais
+🎯 Objetivos do Projeto
+	•	Subdomain Takeover 100% confiável
+	•	Arquitetura extensível (YAML + Go)
+	•	Execução rápida (PASSIVE-LITE)
+	•	Evolução para:
+	•	Fuzzing inteligente
+	•	OWASP Top 10
+	•	Dashboard web com gráficos e severidade
 
-✅ Implementado
+⸻
+
+🚀 Funcionalidades Implementadas
+
+✅ Atuais
 	•	Subdomain Takeover Scanner
-	•	Modo PASSIVE-LITE (rápido e seguro)
-	•	Leitura de listas .txt
 	•	HTTP Client avançado:
-	•	HTTPS primeiro
-	•	Fallback HTTP
-	•	Redirects controlados
+	•	HTTPS first
+	•	HTTP fallback
+	•	Redirect controlado
+	•	TLS skip verify (necessário para takeover)
 	•	Fingerprints em YAML
-	•	Detecção por:
-	•	CNAME
-	•	Body HTTP
+	•	CNAME + HTTP Body match
 	•	Timeout configurável
-	•	Compatível com Kali Linux
-	•	Build sem CGO (CGO_ENABLED=0)
+	•	Modo silencioso (stealth)
+	•	Build estático (CGO_DISABLED)
 
 🧪 Em evolução
-	•	Engine AND + negative
+	•	AND + negative engine
 	•	Confidence score (0–100)
 	•	Output JSON / YAML
 	•	Compatibilidade total com Nuclei
-	•	Fuzzing (open redirect, XSS, SQLi, etc.)
-	•	Dashboard web com gráficos
+	•	Fuzzing (open redirect, XSS, SQLi, IDOR…)
+	•	Dashboard web (estilo Nessus)
 
 ⸻
 
-📂 Estrutura do projeto
+📂 Estrutura do Projeto
 
 BlueGuard/
 ├── cmd/
 │   └── blueguard/
-│       └── main.go          # CLI principal
+│       └── main.go            # CLI principal
 │
 ├── internal/
 │   ├── analysis/
-│   │   └── takeover.go     # Engine de takeover
+│   │   ├── takeover.go       # Engine takeover
+│   │   └── loader.go         # Loader YAML
 │   │
 │   └── httpx/
-│       ├── client.go       # HTTP client (HTTPS + redirect)
-│       └── result.go       # Struct Result
+│       ├── client.go         # HTTP client avançado
+│       └── result.go         # Struct Result
 │
 ├── fingerprints/
 │   ├── aws_s3.yaml
@@ -56,9 +64,9 @@ BlueGuard/
 │   ├── azure.yaml
 │   └── heroku.yaml
 │
-├── outputs/                # Gerado automaticamente
-├── scripts/                # (planejado)
-├── web/                    # (planejado)
+├── outputs/                  # Gerado automaticamente
+├── scripts/                  # (futuro – fuzz/custom)
+├── web/                      # (futuro – dashboard)
 ├── go.mod
 ├── go.sum
 └── README.md
@@ -73,7 +81,7 @@ BlueGuard/
 git clone https://github.com/leomarqueseh/BlueGuard.git
 cd BlueGuard
 
-2️⃣ Build (obrigatório sem CGO)
+2️⃣ Build (recomendado)
 
 export CGO_ENABLED=0
 go clean -cache
@@ -83,53 +91,96 @@ go build -o blueguard ./cmd/blueguard
 
 ⸻
 
-🏁 Uso básico
+🏁 Uso Geral
 
 ./blueguard [flags]
 
 
 ⸻
 
-🟢 Modo PASSIVE-LITE (RECOMENDADO)
+🏳️ FLAGS DISPONÍVEIS
+
+Flag	Descrição
+-t	Target único (ex: example.com)
+-list	Arquivo .txt com domínios ou URLs
+-passive-lite	Somente takeover (rápido e seguro)
+-passive	Recon passivo + takeover
+-active	Scan ativo (em evolução)
+-full	Scan completo (recon + active + fuzz – futuro)
+-stealth	Modo silencioso (menos logs)
+-rate	Requests por segundo
+-delay	Delay entre requests
+-timeout	Timeout HTTP
+
+
+⸻
+
+🟢 MODO PASSIVE-LITE (RECOMENDADO)
 
 📌 O que faz?
 	•	Apenas Subdomain Takeover
 	•	Sem crawling
 	•	Sem GAU
-	•	Rápido
-	•	Ideal para bug bounty e triagem inicial
+	•	Extremamente rápido
+	•	Ideal para bug bounty
 
-⸻
-
-▶️ Usar com lista de subdomínios
+▶️ Usando lista
 
 ./blueguard -passive-lite -list subs.txt
 
-📄 subs.txt (exemplo):
+📄 subs.txt
 
 blog.example.com
 cdn.example.com
 static.example.com
 
-
-⸻
-
-▶️ Usar com target único
+▶️ Target único
 
 ./blueguard -passive-lite -t example.com
 
 
 ⸻
 
-📤 Output esperado
+🟡 MODO PASSIVE
 
-BlueGuard - Passive Takeover Scanner
+📌 O que faz?
+	•	Recon passivo
+	•	Coleta URLs
+	•	Executa takeover
+
+./blueguard -passive -t example.com
+
+
+⸻
+
+🔴 MODO FULL (planejado)
+
+./blueguard -full -t example.com
+
+Inclui:
+	•	Recon
+	•	Takeover
+	•	Fuzzing
+	•	OWASP Top 10
+
+⸻
+
+🕵️ MODO STEALTH
+
+Reduz logs e padrões agressivos.
+
+./blueguard -passive-lite -list subs.txt -stealth
+
+
+⸻
+
+📤 Output esperado
 
 🟢 Modo: PASSIVE-LITE (takeover only)
 📄 Usando lista: subs.txt
 ✅ Nenhum takeover encontrado
 
-Ou, se houver falha:
+Ou:
 
 🔥 POSSÍVEIS TAKEOVERS:
  - blog.example.com (AWS S3)
@@ -137,24 +188,13 @@ Ou, se houver falha:
 
 ⸻
 
-🏳️ Flags disponíveis
+📄 Fingerprints YAML
 
-Flag	Descrição
--t	Target único (ex: example.com)
--list	Arquivo .txt com domínios ou URLs
--passive-lite	Scan rápido (somente takeover)
--timeout	Timeout HTTP (default: 8s)
-
-
-⸻
-
-📄 Fingerprints (YAML)
-
-📌 Local
+📂 Local:
 
 fingerprints/
 
-📌 Exemplo: aws_s3.yaml
+Exemplo – aws_s3.yaml
 
 id: aws-s3
 provider: AWS S3
@@ -172,59 +212,53 @@ http:
 
 ⸻
 
-🔐 Confiabilidade do Takeover
+🔐 Confiabilidade
 
-O BlueGuard considera takeover válido apenas quando:
+O BlueGuard só reporta takeover quando:
 
-✔ CNAME aponta para provider conhecido
-✔ Resposta HTTP contém fingerprint específica
-✔ HTTPS/HTTP testado
-✔ Redirecionamentos controlados
+✔ CNAME válido
+✔ Provider reconhecido
+✔ HTTP fingerprint específica
+✔ HTTPS/HTTP testados
+✔ Redirecionamento controlado
 
-❗ Sem brute force, sem guessing, sem falso positivo proposital.
+➡️ Zero false positive por design
 
 ⸻
 
-🧠 Roadmap (próximos passos)
+🧠 Roadmap Oficial
 
 🔵 Curto prazo
-	•	Engine AND + negative
-	•	Confidence score real (0–100)
+	•	AND + negative engine
+	•	Confidence score
 	•	Output JSON / YAML
 	•	Debug mode
 
 🔴 Médio prazo
-	•	Fuzzing (open redirect, XSS, SQLi, IDOR)
+	•	Fuzzing:
+	•	Open Redirect
+	•	XSS
+	•	SQLi
+	•	IDOR
 	•	Scripts customizados
-	•	OWASP Top 10 2021 + 2025
+	•	OWASP Top 10 (2021 + 2025)
 
 🟣 Longo prazo
-	•	Dashboard web estilo Nessus
+	•	Dashboard web (Nessus-like)
 	•	Gráficos de risco
 	•	Histórico de scans
-	•	Classificação por ativo
+	•	Classificação de severidade
 
 ⸻
 
-⚠️ Aviso legal
+⚠️ Aviso Legal
 
-Este projeto é destinado exclusivamente para fins educacionais e testes autorizados.
-O uso indevido é de inteira responsabilidade do usuário.
-
-⸻
-
-🤝 Contribuições
-
-Pull requests são bem-vindos.
-Antes de contribuir:
-	•	Siga o padrão YAML
-	•	Evite false positives
-	•	Documente fingerprints novos
+Uso exclusivamente autorizado.
+O autor não se responsabiliza por uso indevido.
 
 ⸻
 
-📌 Status do projeto
+📌 Status
 
-🟢 Ativo e em evolução constante
-🚀 Base sólida pronta para crescer
+🟢 Ativo | Em evolução | Arquitetura sólida
 
