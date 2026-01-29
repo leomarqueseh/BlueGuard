@@ -1,49 +1,74 @@
-🛡️ BlueGuard – Automated Vulnerability Scanner
 
-BlueGuard é um framework modular de segurança ofensiva, escrito em Go, focado em alta confiabilidade, zero false positive e evolução contínua para cobrir Subdomain Takeover, Fuzzing e OWASP Top 10 (2021 + 2025).
 
-Inspirado em ferramentas como Nuclei, Nessus e Burp, porém com engine própria, fingerprints em YAML e controle total do fluxo.
+██████╗ ██╗     ██╗   ██╗███████╗ ██████╗ ██╗   ██╗ █████╗ ██████╗ ██████╗ 
+██╔══██╗██║     ██║   ██║██╔════╝██╔════╝ ██║   ██║██╔══██╗██╔══██╗██╔══██╗
+██████╔╝██║     ██║   ██║█████╗  ██║  ███╗██║   ██║███████║██████╔╝██║  ██║
+██╔══██╗██║     ██║   ██║██╔══╝  ██║   ██║██║   ██║██╔══██║██╔══██╗██║  ██║
+██████╔╝███████╗╚██████╔╝███████╗╚██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝
+╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝
 
-⸻
+# 🛡️ BlueGuard – Automated Vulnerability Scanner
 
-🎯 Objetivos do Projeto
-	•	Subdomain Takeover 100% confiável
-	•	Arquitetura extensível (YAML + Go)
-	•	Execução rápida (PASSIVE-LITE)
-	•	Evolução para:
-	•	Fuzzing inteligente
-	•	OWASP Top 10
-	•	Dashboard web com gráficos e severidade
+BlueGuard é um **framework modular de segurança ofensiva**, escrito em **Go**, focado em **alta confiabilidade**, **zero false positive** e **evolução contínua** para cobrir:
 
-⸻
+- Subdomain Takeover  
+- Fuzzing inteligente  
+- OWASP Top 10 (2021 + 2025)  
 
-🚀 Funcionalidades Implementadas
+Inspirado em **Nuclei**, **Nessus** e **Burp Suite**, porém com **engine própria**, fingerprints em **YAML** e **controle total do fluxo de execução**.
 
-✅ Atuais
-	•	Subdomain Takeover Scanner
-	•	HTTP Client avançado:
-	•	HTTPS first
-	•	HTTP fallback
-	•	Redirect controlado
-	•	TLS skip verify (necessário para takeover)
-	•	Fingerprints em YAML
-	•	CNAME + HTTP Body match
-	•	Timeout configurável
-	•	Modo silencioso (stealth)
-	•	Build estático (CGO_DISABLED)
+---
 
-🧪 Em evolução
-	•	AND + negative engine
-	•	Confidence score (0–100)
-	•	Output JSON / YAML
-	•	Compatibilidade total com Nuclei
-	•	Fuzzing (open redirect, XSS, SQLi, IDOR…)
-	•	Dashboard web (estilo Nessus)
+## 🎯 Objetivos do Projeto
 
-⸻
+- Subdomain Takeover **100% confiável**
+- Arquitetura extensível (**YAML + Go**)
+- Execução rápida e silenciosa (**PASSIVE-LITE**)
+- Evolução planejada para:
+  - Fuzzing inteligente
+  - OWASP Top 10
+  - Dashboard web com gráficos, risco e severidade
 
-📂 Estrutura do Projeto
+---
 
+## 🚀 Funcionalidades
+
+### ✅ Implementado (Atual)
+
+- **Subdomain Takeover Scanner**
+- **HTTP Client avançado**
+  - HTTPS first
+  - Fallback HTTP
+  - Redirect controlado
+  - TLS Skip Verify (necessário para takeover)
+- **Fingerprints em YAML**
+  - CNAME validation
+  - HTTP body match
+- Timeout configurável
+- Modo silencioso (**stealth**)
+- Build estático (`CGO_ENABLED=0`)
+
+---
+
+### 🧪 Em Evolução / Planejado
+
+- Engine **AND + negative**
+- **Confidence score** (0–100)
+- Output estruturado (**JSON / YAML**)
+- Compatibilidade total com **Nuclei**
+- **Fuzzing**:
+  - Open Redirect
+  - XSS
+  - SQLi
+  - IDOR
+- Scripts customizados (pre / post / fuzz)
+- **Dashboard web** (estilo Nessus)
+
+---
+
+## 📂 Estrutura do Projeto
+
+```text
 BlueGuard/
 ├── cmd/
 │   └── blueguard/
@@ -98,16 +123,16 @@ go build -o blueguard ./cmd/blueguard
 
 ⸻
 
-🏳️ FLAGS DISPONÍVEIS
+🏳️ Flags Disponíveis
 
 Flag	Descrição
 -t	Target único (ex: example.com)
 -list	Arquivo .txt com domínios ou URLs
--passive-lite	Somente takeover (rápido e seguro)
+-passive-lite	Apenas takeover (rápido e seguro)
 -passive	Recon passivo + takeover
 -active	Scan ativo (em evolução)
--full	Scan completo (recon + active + fuzz – futuro)
--stealth	Modo silencioso (menos logs)
+-full	Scan completo (planejado)
+-stealth	Modo silencioso
 -rate	Requests por segundo
 -delay	Delay entre requests
 -timeout	Timeout HTTP
@@ -115,7 +140,7 @@ Flag	Descrição
 
 ⸻
 
-🟢 MODO PASSIVE-LITE (RECOMENDADO)
+🟢 Modo PASSIVE-LITE (RECOMENDADO)
 
 📌 O que faz?
 	•	Apenas Subdomain Takeover
@@ -128,7 +153,7 @@ Flag	Descrição
 
 ./blueguard -passive-lite -list subs.txt
 
-📄 subs.txt
+subs.txt
 
 blog.example.com
 cdn.example.com
@@ -141,10 +166,10 @@ static.example.com
 
 ⸻
 
-🟡 MODO PASSIVE
+🟡 Modo PASSIVE
 
 📌 O que faz?
-	•	Recon passivo
+	•	Reconhecimento passivo
 	•	Coleta URLs
 	•	Executa takeover
 
@@ -153,7 +178,7 @@ static.example.com
 
 ⸻
 
-🔴 MODO FULL (planejado)
+🔴 Modo FULL (Planejado)
 
 ./blueguard -full -t example.com
 
@@ -165,7 +190,7 @@ Inclui:
 
 ⸻
 
-🕵️ MODO STEALTH
+🕵️ Modo STEALTH
 
 Reduz logs e padrões agressivos.
 
@@ -174,7 +199,7 @@ Reduz logs e padrões agressivos.
 
 ⸻
 
-📤 Output esperado
+📤 Output Esperado
 
 🟢 Modo: PASSIVE-LITE (takeover only)
 📄 Usando lista: subs.txt
@@ -218,8 +243,8 @@ O BlueGuard só reporta takeover quando:
 
 ✔ CNAME válido
 ✔ Provider reconhecido
-✔ HTTP fingerprint específica
-✔ HTTPS/HTTP testados
+✔ Fingerprint HTTP específica
+✔ HTTPS e HTTP testados
 ✔ Redirecionamento controlado
 
 ➡️ Zero false positive por design
@@ -228,13 +253,13 @@ O BlueGuard só reporta takeover quando:
 
 🧠 Roadmap Oficial
 
-🔵 Curto prazo
+🔵 Curto Prazo
 	•	AND + negative engine
 	•	Confidence score
 	•	Output JSON / YAML
 	•	Debug mode
 
-🔴 Médio prazo
+🔴 Médio Prazo
 	•	Fuzzing:
 	•	Open Redirect
 	•	XSS
@@ -243,7 +268,7 @@ O BlueGuard só reporta takeover quando:
 	•	Scripts customizados
 	•	OWASP Top 10 (2021 + 2025)
 
-🟣 Longo prazo
+🟣 Longo Prazo
 	•	Dashboard web (Nessus-like)
 	•	Gráficos de risco
 	•	Histórico de scans
@@ -253,12 +278,11 @@ O BlueGuard só reporta takeover quando:
 
 ⚠️ Aviso Legal
 
-Uso exclusivamente autorizado.
+Este projeto deve ser utilizado exclusivamente em ambientes autorizados.
 O autor não se responsabiliza por uso indevido.
 
 ⸻
 
 📌 Status
 
-🟢 Ativo | Em evolução | Arquitetura sólida
-
+🟢 Ativo | 🚧 Em evolução | 🧱 Arquitetura sólida
