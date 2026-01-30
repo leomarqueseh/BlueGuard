@@ -1,4 +1,6 @@
 
+
+````markdown
 ██████╗ ██╗     ██╗   ██╗███████╗ ██████╗ ██╗   ██╗ █████╗ ██████╗ ██████╗ 
 ██╔══██╗██║     ██║   ██║██╔════╝██╔════╝ ██║   ██║██╔══██╗██╔══██╗██╔══██╗
 ██████╔╝██║     ██║   ██║█████╗  ██║  ███╗██║   ██║███████║██████╔╝██║  ██║
@@ -20,7 +22,7 @@ Inspirado em **Nuclei**, **Nessus** e **Burp Suite**, porém com **engine própr
 
 ## 🎯 Objetivos do Projeto
 
-- Subdomain Takeover **confiável**
+- Subdomain Takeover **100% confiável**
 - Arquitetura extensível (**YAML + Go**)
 - Execução rápida e silenciosa (**PASSIVE-LITE**)
 - Evolução planejada para:
@@ -94,132 +96,154 @@ BlueGuard/
 ├── go.mod
 ├── go.sum
 └── README.md
+````
 
+---
 
-⸻
+## ⚙️ Instalação
 
-⚙️ Instalação
+### 1️⃣ Clonar o repositório
 
-1️⃣ Clonar o repositório
-
+```bash
 git clone https://github.com/leomarqueseh/BlueGuard.git
 cd BlueGuard
+```
 
-2️⃣ Build (recomendado)
+### 2️⃣ Build (recomendado)
 
+```bash
 export CGO_ENABLED=0
 go clean -cache
 go mod tidy
 go build -o blueguard ./cmd/blueguard
+```
 
+---
 
-⸻
+## 🏁 Uso Geral
 
-🏁 Uso Geral
-
+```bash
 ./blueguard [flags]
+```
 
+---
 
-⸻
+## 🏳️ Flags Disponíveis
 
-🏳️ Flags Disponíveis
+| Flag            | Descrição                           |
+| --------------- | ----------------------------------- |
+| `-t`            | Target único (ex: example.com)      |
+| `-list`         | Arquivo `.txt` com domínios ou URLs |
+| `-passive-lite` | Apenas takeover (rápido e seguro)   |
+| `-passive`      | Recon passivo + takeover            |
+| `-active`       | Scan ativo (em evolução)            |
+| `-full`         | Scan completo (planejado)           |
+| `-stealth`      | Modo silencioso                     |
+| `-rate`         | Requests por segundo                |
+| `-delay`        | Delay entre requests                |
+| `-timeout`      | Timeout HTTP                        |
 
-Flag	Descrição
--t	Target único (ex: example.com)
--list	Arquivo .txt com domínios ou URLs
--passive-lite	Apenas takeover (rápido e seguro)
--passive	Recon passivo + takeover
--active	Scan ativo (em evolução)
--full	Scan completo (planejado)
--stealth	Modo silencioso
--rate	Requests por segundo
--delay	Delay entre requests
--timeout	Timeout HTTP
+---
 
+## 🟢 Modo PASSIVE-LITE (RECOMENDADO)
 
-⸻
+### 📌 O que faz?
 
-🟢 Modo PASSIVE-LITE (RECOMENDADO)
+* Apenas **Subdomain Takeover**
+* Sem crawling
+* Sem GAU
+* Extremamente rápido
+* Ideal para **bug bounty**
 
-📌 O que faz?
-	•	Apenas Subdomain Takeover
-	•	Sem crawling
-	•	Sem GAU
-	•	Extremamente rápido
-	•	Ideal para bug bounty
+### ▶️ Usando lista
 
-▶️ Usando lista
-
+```bash
 ./blueguard -passive-lite -list subs.txt
+```
 
-subs.txt
+**subs.txt**
 
+```text
 blog.example.com
 cdn.example.com
 static.example.com
+```
 
-▶️ Target único
+### ▶️ Target único
 
+```bash
 ./blueguard -passive-lite -t example.com
+```
 
+---
 
-⸻
+## 🟡 Modo PASSIVE
 
-🟡 Modo PASSIVE
+### 📌 O que faz?
 
-📌 O que faz?
-	•	Reconhecimento passivo
-	•	Coleta URLs
-	•	Executa takeover
+* Reconhecimento passivo
+* Coleta URLs
+* Executa takeover
 
+```bash
 ./blueguard -passive -t example.com
+```
 
+---
 
-⸻
+## 🔴 Modo FULL (Planejado)
 
-🔴 Modo FULL (Planejado)
-
+```bash
 ./blueguard -full -t example.com
+```
 
 Inclui:
-	•	Recon
-	•	Takeover
-	•	Fuzzing
-	•	OWASP Top 10
 
-⸻
+* Recon
+* Takeover
+* Fuzzing
+* OWASP Top 10
 
-🕵️ Modo STEALTH
+---
+
+## 🕵️ Modo STEALTH
 
 Reduz logs e padrões agressivos.
 
+```bash
 ./blueguard -passive-lite -list subs.txt -stealth
+```
 
+---
 
-⸻
+## 📤 Output Esperado
 
-📤 Output Esperado
-
+```text
 🟢 Modo: PASSIVE-LITE (takeover only)
 📄 Usando lista: subs.txt
 ✅ Nenhum takeover encontrado
+```
 
 Ou:
 
+```text
 🔥 POSSÍVEIS TAKEOVERS:
  - blog.example.com (AWS S3)
+```
 
+---
 
-⸻
-
-📄 Fingerprints YAML
+## 📄 Fingerprints YAML
 
 📂 Local:
 
+```text
 fingerprints/
+```
 
-Exemplo – aws_s3.yaml
+### Exemplo – `aws_s3.yaml`
 
+```yaml
 id: aws-s3
 provider: AWS S3
 
@@ -232,13 +256,13 @@ http:
       words:
         - NoSuchBucket
         - The specified bucket does not exist
+```
 
+---
 
-⸻
+## 🔐 Confiabilidade
 
-🔐 Confiabilidade
-
-O BlueGuard só reporta takeover quando:
+O BlueGuard **só reporta takeover** quando:
 
 ✔ CNAME válido
 ✔ Provider reconhecido
@@ -246,43 +270,47 @@ O BlueGuard só reporta takeover quando:
 ✔ HTTPS e HTTP testados
 ✔ Redirecionamento controlado
 
-➡️ Zero false positive por design
+➡️ **Zero false positive por design**
 
-⸻
+---
 
-🧠 Roadmap Oficial
+## 🧠 Roadmap Oficial
 
-🔵 Curto Prazo
-	•	AND + negative engine
-	•	Confidence score
-	•	Output JSON / YAML
-	•	Debug mode
+### 🔵 Curto Prazo
 
-🔴 Médio Prazo
-	•	Fuzzing:
-	•	Open Redirect
-	•	XSS
-	•	SQLi
-	•	IDOR
-	•	Scripts customizados
-	•	OWASP Top 10 (2021 + 2025)
+* AND + negative engine
+* Confidence score
+* Output JSON / YAML
+* Debug mode
 
-🟣 Longo Prazo
-	•	Dashboard web (Nessus-like)
-	•	Gráficos de risco
-	•	Histórico de scans
-	•	Classificação de severidade
+### 🔴 Médio Prazo
 
-⸻
+* Fuzzing:
 
-⚠️ Aviso Legal
+  * Open Redirect
+  * XSS
+  * SQLi
+  * IDOR
+* Scripts customizados
+* OWASP Top 10 (2021 + 2025)
 
-Este projeto deve ser utilizado exclusivamente em ambientes autorizados.
+### 🟣 Longo Prazo
+
+* Dashboard web (Nessus-like)
+* Gráficos de risco
+* Histórico de scans
+* Classificação de severidade
+
+---
+
+## ⚠️ Aviso Legal
+
+Este projeto deve ser utilizado **exclusivamente em ambientes autorizados**.
 O autor não se responsabiliza por uso indevido.
 
-⸻
+---
 
-📌 Status
+## 📌 Status
 
-🟢 Ativo | 🚧 Em evolução | 🧱 Arquitetura sólida
+🟢 **Ativo** | 🚧 **Em evolução** | 🧱 **Arquitetura sólida**
 
