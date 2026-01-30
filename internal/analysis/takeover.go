@@ -2,12 +2,14 @@ package analysis
 
 import (
 	"bufio"
+	"context"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/leomarqueseh/BlueGuard/internal/httpx"
 )
 
 type TakeoverFinding struct {
@@ -16,91 +18,101 @@ type TakeoverFinding struct {
 	Evidence string
 }
 
+// RunTakeover executa takeover passivo com DNS + HTTP controlados
 func RunTakeover(filePath string, timeout time.Duration) ([]TakeoverFinding, error) {
+
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	hosts := make(map[string]bool)
+	hosts := make(map[string]struct{})
 	scanner := bufio.NewScanner(file)
 
+	// 🔹 NORMALIZAÇÃO DE INPUT
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" {
 			continue
 		}
 
-		if strings.HasPrefix(line, "http") {
+		if strings.HasPrefix(line, "http://") || strings.HasPrefix(line, "https://") {
 			u, err := url.Parse(line)
-			if err == nil && u.Hostname() != "" {
-				hosts[u.Hostname()] = true
+			if err != nil || u.Hostname() == "" {
+				if Verbose {
+					logf("URL inválida ignorada: %s", line)
+				}
+				continue
 			}
+			hosts[u.Hostname()] = struct{}{}
 		} else {
-			hosts[line] = true
+			hosts[line] = struct{}{}
 		}
 	}
 
-	client := http.Client{Timeout: timeout}
-	var results []TakeoverFinding
+	var findings []TakeoverFinding
+
+	// 🔹 DNS resolver com timeout
+	resolver := &net.Resolver{}
 
 	for host := range hosts {
-		cname, err := net.LookupCNAME(host)
-		if err != nil {
+
+		if Verbose {
+			logf("Analisando host: %s", host)
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		cname, err := resolver.LookupCNAME(ctx, host)
+		cancel()
+
+		if err != nil || cname == "" {
+			if Verbose {
+				logf("CNAME não resolvido para %s", host)
+			}
 			continue
 		}
 
-		provider := detectProvider(cname)
-		if provider == "" {
+		if Verbose {
+			logf("CNAME encontrado: %s → %s", host, cname)
+		}
+
+		fp := DetectFingerprintByCNAME(cname)
+		if fp == nil {
+			if Verbose {
+				logf("Nenhum fingerprint compatível para %s", cname)
+			}
 			continue
 		}
 
-		resp, err := client.Get("http://" + host)
-		if err != nil {
+		if Verbose {
+			logf("Fingerprint candidato: %s (%s)", fp.Provider, host)
+		}
+
+		// 🔹 HTTP controlado (HTTPS → HTTP)
+		resp, err := httpx.Fetch(host, timeout)
+		if err != nil || resp == nil {
+			if Verbose {
+				logf("HTTP não respondeu para %s", host)
+			}
 			continue
 		}
 
-		buf := make([]byte, 2048)
-		resp.Body.Read(buf)
-		resp.Body.Close()
-
-		if fingerprint(provider, string(buf)) {
-			results = append(results, TakeoverFinding{
+		// 🔹 MATCHERS AND + NEGATIVE
+		if MatchFingerprint(fp, resp) {
+			findings = append(findings, TakeoverFinding{
 				Host:     host,
-				Provider: provider,
-				Evidence: "Unclaimed service response",
+				Provider: fp.Provider,
+				Evidence: "Fingerprint match (CNAME + HTTP)",
 			})
+
+			if Verbose {
+				logf("🚨 POSSÍVEL TAKEOVER: %s (%s)", host, fp.Provider)
+			}
+		} else if Verbose {
+			logf("HTTP respondeu, mas fingerprint não confirmou (%s)", host)
 		}
 	}
 
-	return results, nil
-}
-
-func detectProvider(cname string) string {
-	switch {
-	case strings.Contains(cname, "amazonaws.com"):
-		return "AWS S3"
-	case strings.Contains(cname, "github.io"):
-		return "GitHub Pages"
-	case strings.Contains(cname, "herokudns.com"):
-		return "Heroku"
-	case strings.Contains(cname, "azurewebsites.net"):
-		return "Azure"
-	}
-	return ""
-}
-
-func fingerprint(provider, body string) bool {
-	switch provider {
-	case "AWS S3":
-		return strings.Contains(body, "NoSuchBucket")
-	case "GitHub Pages":
-		return strings.Contains(body, "There isn't a GitHub Pages site here")
-	case "Heroku":
-		return strings.Contains(body, "No such app")
-	case "Azure":
-		return strings.Contains(body, "404 Web Site not found")
-	}
-	return false
+	return findings, nil
 }

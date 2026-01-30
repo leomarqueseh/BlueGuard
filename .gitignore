@@ -9,10 +9,15 @@
 *.test
 *.out
 
-# Binaries
-blueguard
+# =====================
+# BINÁRIOS (apenas na raiz)
+# =====================
+/blueguard
+/blueguard.exe
 
-# Go workspace
+# =====================
+# GO WORKSPACE
+# =====================
 /go.work
 /go.work.sum
 
@@ -24,7 +29,9 @@ blueguard
 /build/
 /vendor/
 
-# Go cache (local)
+# =====================
+# GO CACHE / LOGS
+# =====================
 *.tmp
 *.log
 
