@@ -1,74 +1,27 @@
-# =====================
-# GO
-# =====================
+# Binaries
+blueguard
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-*.test
+
+# Go build
 *.out
+*.test
+*.prof
 
-# =====================
-# BINÁRIOS (apenas na raiz)
-# =====================
-/blueguard
-/blueguard.exe
+# Go workspace
+bin/
+pkg/
 
-# =====================
-# GO WORKSPACE
-# =====================
-/go.work
-/go.work.sum
-
-# =====================
-# BUILD / CACHE
-# =====================
-/bin/
-/dist/
-/build/
-/vendor/
-
-# =====================
-# GO CACHE / LOGS
-# =====================
-*.tmp
+# Logs
 *.log
 
-# =====================
-# OUTPUTS / SCANS
-# =====================
-outputs/
-results/
-*.json
-*.yaml.out
-*.report
-
-# =====================
-# IDE / EDITOR
-# =====================
+# IDEs
 .vscode/
 .idea/
-*.swp
-*.swo
-*.bak
 
-# =====================
-# OS
-# =====================
+# OS files
 .DS_Store
 Thumbs.db
-
-# =====================
-# SECURITY / TOKENS
-# =====================
-.env
-.env.*
-*.key
-*.pem
-*.crt
-
-# =====================
-# GIT
-# =====================
-*.orig
