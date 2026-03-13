@@ -1,36 +1,39 @@
-🛡️ BlueGuard | Vulnerability Scanner Professional
-O BlueGuard é um scanner de vulnerabilidades de última geração, desenvolvido em Go para garantir máxima performance em operações de segurança ofensiva.
+# 🛡️ BlueGuard | Vulnerability Scanner Professional
 
-Projetado para ser rápido, modular e escalável, o BlueGuard é a solução ideal para empresas que precisam monitorar grandes superfícies de ataque com precisão e agilidade.
+O **BlueGuard** é um scanner de vulnerabilidades de última geração, desenvolvido em **Go** para garantir máxima performance em operações de segurança ofensiva. 
 
-🚀 Principais Diferenciais
-⚡ Alta Performance: Motor de varredura impulsionado por Goroutines, permitindo milhares de requisições simultâneas.
+Projetado para ser **rápido, modular e escalável**, o BlueGuard é a solução ideal para empresas que precisam monitorar grandes superfícies de ataque com precisão e agilidade.
 
-🧩 Arquitetura de Plugins: Sistema modular que permite a ativação de detecções específicas conforme a necessidade do cliente.
+---
 
-🏗️ Worker Pool Inteligente: Gestão eficiente de recursos para evitar sobrecarga no sistema e garantir estabilidade.
+## 🚀 Principais Diferenciais
 
-🌐 Escaneamento HTTP de Elite: Otimizado para identificar falhas de configuração e exposição de dados sensíveis em segundos.
+* **⚡ Alta Performance:** Motor de varredura impulsionado por *Goroutines*, permitindo milhares de requisições simultâneas.
+* **🧩 Arquitetura de Plugins:** Sistema modular que permite a ativação de detecções específicas conforme a necessidade do cliente.
+* **🏗️ Worker Pool Inteligente:** Gestão eficiente de recursos para evitar sobrecarga no sistema e garantir estabilidade.
+* **🌐 Escaneamento HTTP de Elite:** Otimizado para identificar falhas de configuração e exposição de dados sensíveis em segundos.
 
-📂 Arquitetura do Sistema
-A estrutura do BlueGuard foi desenhada para facilitar a manutenção e garantir o sigilo das regras de detecção:
+---
 
-📁 cmd/blueguard: Ponto de entrada da CLI (Interface de Linha de Comando).
+## 📂 Arquitetura do Sistema
 
-📁 internal/scanner: O "cérebro" do sistema; motor central de análise.
+A estrutura do **BlueGuard** foi desenhada para facilitar a manutenção e garantir o sigilo das regras de detecção:
 
-📁 internal/plugins: Biblioteca privada de módulos de detecção de vulnerabilidades.
+* `📁 cmd/blueguard`: Ponto de entrada da CLI (Interface de Linha de Comando).
+* `📁 internal/scanner`: O "cérebro" do sistema; motor central de análise.
+* `📁 internal/plugins`: Biblioteca privada de módulos de detecção de vulnerabilidades.
+* `📁 internal/worker`: Orquestrador de threads para processamento paralelo.
 
-📁 internal/worker: Orquestrador de threads para processamento paralelo.
+---
 
-🛠️ Instalação e Build
-[!IMPORTANT]
-Este é um software de uso privado e comercial. Certifique-se de possuir as permissões necessárias antes de prosseguir.
+## 🛠️ Instalação e Build
 
-1. Clonar o Repositório Privado:
+> [!IMPORTANT]
+> Este é um software de uso **privado e comercial**. Certifique-se de possuir as permissões necessárias antes de prosseguir.
 
-Bash
-git clone https://github.com/leomarqueseh/BlueGuard.git
+**1. Clonar o Repositório Privado:**
+```bash
+git clone [https://github.com/leomarqueseh/BlueGuard.git](https://github.com/leomarqueseh/BlueGuard.git)
 cd BlueGuard
 2. Compilar o Binário Otimizado:
 
@@ -41,7 +44,7 @@ CGO_ENABLED=0 go build -o blueguard ./cmd/blueguard
 Ideal para validações rápidas em um endpoint específico.
 
 Bash
-./blueguard -u https://alvo-cliente.com.br
+./blueguard -u [https://alvo-cliente.com.br](https://alvo-cliente.com.br)
 📊 Escaneamento em Lote (Bulk Scan)
 Para mapear toda uma infraestrutura a partir de uma lista.
 
@@ -52,11 +55,11 @@ Dica: Utilize a flag -w para ajustar o número de workers simultâneos.
 📝 Exemplo de Relatório Técnico
 Plaintext
 [🔴 HIGH] Git Repository Exposed
-📍 Target: https://client-api.com
+📍 Target: [https://client-api.com](https://client-api.com)
 ⚠️ Evidence: .git/config accessible. Potential source code leak.
 
 [🟡 MEDIUM] Possible Open Redirect
-📍 Target: https://client-api.com
+📍 Target: [https://client-api.com](https://client-api.com)
 ⚠️ Evidence: Parameter 'redirect' allows external URLs.
 🗺️ Roadmap de Desenvolvimento (Enterprise)
 [ ] Subdomain Discovery: Mapeamento automático de subdomínios.
