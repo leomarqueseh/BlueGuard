@@ -1,45 +1,24 @@
 package plugins
 
 import (
-	"sync"
+	"context"
 
-	"blueguard/internal/core"
+	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 )
 
-// RunAll executa todos os plugins registrados
-func RunAll(ctx *core.ScanContext) ([]core.Finding, error) {
+func RunAll(ctx context.Context, registry *Registry, target scanner.Target) ([]scanner.Finding, error) {
 
-	var (
-		findings []core.Finding
-		mu       sync.Mutex
-		wg       sync.WaitGroup
-	)
+	var findings []scanner.Finding
 
-	for _, plugin := range Registry {
+	for _, plugin := range registry.All() {
 
-		wg.Add(1)
+		result, err := plugin.Run(ctx, target)
+		if err != nil {
+			continue
+		}
 
-		go func(p Plugin) {
-			defer wg.Done()
-
-			results, err := p.Run(ctx)
-			if err != nil {
-				return
-			}
-
-			if len(results) == 0 {
-				return
-			}
-
-			mu.Lock()
-			findings = append(findings, results...)
-			mu.Unlock()
-
-		}(plugin)
-
+		findings = append(findings, result...)
 	}
-
-	wg.Wait()
 
 	return findings, nil
 }

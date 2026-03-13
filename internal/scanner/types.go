@@ -1,18 +1,15 @@
 package scanner
 
-import "time"
-
 type Target struct {
 	URL string
 }
 
 type Finding struct {
-	PluginID    string
 	Title       string
 	Description string
 	Severity    string
+	Target      string
 	Evidence    string
-	Timestamp   time.Time
 }
 
 type ScanResult struct {

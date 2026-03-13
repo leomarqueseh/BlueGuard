@@ -5,7 +5,14 @@ type Registry struct {
 }
 
 func NewRegistry() *Registry {
-	return &Registry{}
+
+	r := &Registry{}
+
+	r.Register(&GitExposed{})
+	r.Register(&OpenRedirect{})
+	r.Register(&HeaderExposure{})
+
+	return r
 }
 
 func (r *Registry) Register(p Plugin) {

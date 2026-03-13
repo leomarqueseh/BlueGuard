@@ -1,29 +1,30 @@
 package scanner
 
-import (
-	"context"
-	"time"
+import "context"
 
-	"github.com/yourusername/blueguard/internal/plugins"
-)
-
-type Engine struct {
-	registry *plugins.Registry
+type Plugin interface {
+	Name() string
+	Run(ctx context.Context, target Target) ([]Finding, error)
 }
 
-func NewEngine(reg *plugins.Registry) *Engine {
+type Engine struct {
+	plugins []Plugin
+}
+
+func NewEngine(p []Plugin) *Engine {
 	return &Engine{
-		registry: reg,
+		plugins: p,
 	}
 }
 
 func (e *Engine) Scan(ctx context.Context, target Target) (*ScanResult, error) {
+
 	result := &ScanResult{
 		Target:   target.URL,
 		Findings: []Finding{},
 	}
 
-	for _, plugin := range e.registry.All() {
+	for _, plugin := range e.plugins {
 
 		select {
 		case <-ctx.Done():

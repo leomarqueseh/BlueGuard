@@ -11,14 +11,24 @@ import (
 
 func main() {
 
-	target := flag.String("target", "", "Target URL or domain")
+	target := flag.String("u", "", "Target URL or domain")
 	timeout := flag.Int("timeout", 10, "Timeout in seconds")
 	userAgent := flag.String("ua", "BlueGuard", "User-Agent")
+	jsonOutput := flag.Bool("json", false, "Output JSON")
 
 	flag.Parse()
 
 	if *target == "" {
-		fmt.Println("Usage: blueguard -target example.com")
+		fmt.Println("BlueGuard Security Scanner")
+		fmt.Println("")
+		fmt.Println("Usage:")
+		fmt.Println("  blueguard -u example.com")
+		fmt.Println("")
+		fmt.Println("Options:")
+		fmt.Println("  -u        Target URL or domain")
+		fmt.Println("  -timeout  Timeout in seconds")
+		fmt.Println("  -ua       Custom User-Agent")
+		fmt.Println("  -json     Output JSON format")
 		return
 	}
 
@@ -30,7 +40,15 @@ func main() {
 
 	results := recon.Run(ctx)
 
+	// JSON output (placeholder para futura implementação)
+	if *jsonOutput {
+		fmt.Println("[JSON output coming soon]")
+		return
+	}
+
+	// Output padrão
 	for _, f := range results {
+
 		fmt.Printf(
 			"\n[%s] %s\nTarget: %s\nConfidence: %d%%\n%s\n",
 			f.Severity,
@@ -39,5 +57,6 @@ func main() {
 			f.Confidence,
 			f.Description,
 		)
+
 	}
 }

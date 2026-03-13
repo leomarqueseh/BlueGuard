@@ -3,52 +3,38 @@ package plugins
 import (
 	"context"
 	"net/http"
-	"time"
 
-	"github.com/yourusername/blueguard/internal/scanner"
+	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 )
 
 type HeaderExposure struct{}
 
-func (p *HeaderExposure) ID() string {
-	return "BG-HTTP-001"
-}
-
 func (p *HeaderExposure) Name() string {
-	return "Sensitive Header Exposure"
-}
-
-func (p *HeaderExposure) Description() string {
-	return "Detects exposure of sensitive HTTP headers."
+	return "header_exposure"
 }
 
 func (p *HeaderExposure) Run(ctx context.Context, target scanner.Target) ([]scanner.Finding, error) {
 
-	client := scanner.NewHTTPClient()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target.URL, nil)
+	resp, err := http.Get(target.URL)
 	if err != nil {
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
+		return nil, nil
 	}
 	defer resp.Body.Close()
 
-	var findings []scanner.Finding
+	server := resp.Header.Get("Server")
 
-	if server := resp.Header.Get("Server"); server != "" {
-		findings = append(findings, scanner.Finding{
-			PluginID:    p.ID(),
+	if server != "" {
+
+		finding := scanner.Finding{
 			Title:       "Server Header Exposed",
-			Description: "The server header reveals backend technology.",
-			Severity:    "Low",
+			Description: "Server header leaks backend technology",
+			Severity:    "LOW",
+			Target:      target.URL,
 			Evidence:    server,
-			Timestamp:   time.Now(),
-		})
+		}
+
+		return []scanner.Finding{finding}, nil
 	}
 
-	return findings, nil
+	return nil, nil
 }
