@@ -1,7 +1,3 @@
-Com certeza! Para um produto comercial, o visual do README funciona como a "vitrine" do seu software. Adicionei ícones estratégicos que reforçam a ideia de segurança, velocidade e tecnologia de ponta.
-
-Aqui está a versão premium e profissional para o seu BlueGuard:
-
 🛡️ BlueGuard | Vulnerability Scanner Professional
 O BlueGuard é um scanner de vulnerabilidades de última geração, desenvolvido em Go para garantir máxima performance em operações de segurança ofensiva.
 
