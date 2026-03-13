@@ -1,26 +1,12 @@
 package analysis
 
-import "fmt"
+func RunAll(target string) []Finding {
 
-// Run executa toda a fase de análise do BlueGuard
-func Run() error {
-	fmt.Println("🧠 [Analysis] Iniciando análise")
+	var results []Finding
 
-	// 1️⃣ Endpoints passivos (GAU)
-	urls, err := RunEndpointCollection([]string{})
-	if err != nil {
-		fmt.Println("⚠️ [Analysis] GAU falhou:", err)
-	}
+	results = append(results, RunGitExposed(target)...)
+	results = append(results, RunTakeover(target)...)
+	results = append(results, RunOpenRedirect(target)...)
 
-	// 2️⃣ Endpoints ativos (Katana)
-	crawled, err := RunCrawler()
-	if err != nil {
-		fmt.Println("⚠️ [Analysis] Katana falhou:", err)
-	}
-
-	// Futuro: merge + dedupe
-	_ = append(urls, crawled...)
-
-	fmt.Println("✅ [Analysis] Análise finalizada")
-	return nil
+	return results
 }
