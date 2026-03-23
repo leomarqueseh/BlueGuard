@@ -1,4 +1,3 @@
-```markdown
 # 🛡️ BlueGuard
 
 BlueGuard é um scanner de segurança moderno desenvolvido em Go, projetado para evoluir de uma ferramenta CLI para uma **Plataforma Unificada de Risco (Risk Platform)**.
