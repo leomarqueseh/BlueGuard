@@ -1,40 +1,38 @@
 package plugins
 
 import (
-	"context"
-	"net/http"
+	"strings"
 
+	"github.com/leomarqueseh/BlueGuard/internal/core"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 )
 
 type OpenRedirect struct{}
 
-func (p *OpenRedirect) Name() string {
+func (o *OpenRedirect) Name() string {
 	return "open_redirect"
 }
 
-func (p *OpenRedirect) Run(ctx context.Context, target scanner.Target) ([]scanner.Finding, error) {
+func (o *OpenRedirect) Run(ctx *core.ScanContext, target scanner.Target) ([]scanner.Finding, error) {
+
+	var findings []scanner.Finding
 
 	testURL := target.URL + "?redirect=https://evil.com"
 
-	resp, err := http.Get(testURL)
+	resp, err := ctx.Client.Get(testURL, ctx.UserAgent)
 	if err != nil {
-		return nil, nil
+		return findings, nil
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode == 302 {
+	if strings.Contains(resp.URL, "evil.com") {
 
-		finding := scanner.Finding{
+		findings = append(findings, scanner.Finding{
 			Title:       "Possible Open Redirect",
-			Description: "Endpoint may allow open redirect",
+			Description: "Parameter may allow redirection",
 			Severity:    "MEDIUM",
 			Target:      target.URL,
-			Evidence:    testURL,
-		}
-
-		return []scanner.Finding{finding}, nil
+		})
 	}
 
-	return nil, nil
+	return findings, nil
 }

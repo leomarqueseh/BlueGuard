@@ -1,40 +1,34 @@
 package plugins
 
 import (
-	"context"
-	"net/http"
-
+	"github.com/leomarqueseh/BlueGuard/internal/core"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 )
 
 type HeaderExposure struct{}
 
-func (p *HeaderExposure) Name() string {
+func (h *HeaderExposure) Name() string {
 	return "header_exposure"
 }
 
-func (p *HeaderExposure) Run(ctx context.Context, target scanner.Target) ([]scanner.Finding, error) {
+func (h *HeaderExposure) Run(ctx *core.ScanContext, target scanner.Target) ([]scanner.Finding, error) {
 
-	resp, err := http.Get(target.URL)
+	var findings []scanner.Finding
+
+	resp, err := ctx.Client.Get(target.URL, ctx.UserAgent)
 	if err != nil {
-		return nil, nil
+		return findings, nil
 	}
-	defer resp.Body.Close()
 
-	server := resp.Header.Get("Server")
+	if server := resp.Headers.Get("Server"); server != "" {
 
-	if server != "" {
-
-		finding := scanner.Finding{
+		findings = append(findings, scanner.Finding{
 			Title:       "Server Header Exposed",
-			Description: "Server header leaks backend technology",
+			Description: server,
 			Severity:    "LOW",
 			Target:      target.URL,
-			Evidence:    server,
-		}
-
-		return []scanner.Finding{finding}, nil
+		})
 	}
 
-	return nil, nil
+	return findings, nil
 }

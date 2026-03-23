@@ -1,40 +1,36 @@
 package plugins
 
 import (
-	"context"
-	"net/http"
-
+	"github.com/leomarqueseh/BlueGuard/internal/core"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 )
 
 type GitExposed struct{}
 
-func (p *GitExposed) Name() string {
+func (g *GitExposed) Name() string {
 	return "git_exposed"
 }
 
-func (p *GitExposed) Run(ctx context.Context, target scanner.Target) ([]scanner.Finding, error) {
+func (g *GitExposed) Run(ctx *core.ScanContext, target scanner.Target) ([]scanner.Finding, error) {
 
-	url := target.URL + "/.git/HEAD"
+	var findings []scanner.Finding
 
-	resp, err := http.Get(url)
+	url := target.URL + "/.git/config"
+
+	resp, err := ctx.Client.Get(url, ctx.UserAgent)
 	if err != nil {
-		return nil, nil
+		return findings, nil
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
 
-		finding := scanner.Finding{
+		findings = append(findings, scanner.Finding{
 			Title:       "Git Repository Exposed",
-			Description: "The .git repository is accessible",
+			Description: ".git/config accessible",
 			Severity:    "HIGH",
 			Target:      target.URL,
-			Evidence:    url,
-		}
-
-		return []scanner.Finding{finding}, nil
+		})
 	}
 
-	return nil, nil
+	return findings, nil
 }
