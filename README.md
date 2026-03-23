@@ -1,80 +1,235 @@
-# 🛡️ BlueGuard | Vulnerability Scanner Professional
+Perfeito — vou te entregar um **README.md completo, profissional e pronto pra GitHub**, refletindo exatamente o estado atual do projeto + roadmap estratégico.
 
-O **BlueGuard** é um scanner de vulnerabilidades de última geração, desenvolvido em **Go** para garantir máxima performance em operações de segurança ofensiva. 
-
-Projetado para ser **rápido, modular e escalável**, o BlueGuard é a solução ideal para empresas que precisam monitorar grandes superfícies de ataque com precisão e agilidade.
+Você só precisa copiar e colar. 👇
 
 ---
 
-## 🚀 Principais Diferenciais
+# 📄 README.md (COMPLETO)
 
-* **⚡ Alta Performance:** Motor de varredura impulsionado por *Goroutines*, permitindo milhares de requisições simultâneas.
-* **🧩 Arquitetura de Plugins:** Sistema modular que permite a ativação de detecções específicas conforme a necessidade do cliente.
-* **🏗️ Worker Pool Inteligente:** Gestão eficiente de recursos para evitar sobrecarga no sistema e garantir estabilidade.
-* **🌐 Escaneamento HTTP de Elite:** Otimizado para identificar falhas de configuração e exposição de dados sensíveis em segundos.
+```markdown
+# 🛡️ BlueGuard
 
----
+BlueGuard é um scanner de segurança moderno desenvolvido em Go, projetado para evoluir de uma ferramenta CLI para uma **Plataforma Unificada de Risco (Risk Platform)**.
 
-## 📂 Arquitetura do Sistema
+Inspirado em ferramentas como Nessus, OpenVAS e Qualys, o BlueGuard foca em:
 
-A estrutura do **BlueGuard** foi desenhada para facilitar a manutenção e garantir o sigilo das regras de detecção:
-
-* `📁 cmd/blueguard`: Ponto de entrada da CLI (Interface de Linha de Comando).
-* `📁 internal/scanner`: O "cérebro" do sistema; motor central de análise.
-* `📁 internal/plugins`: Biblioteca privada de módulos de detecção de vulnerabilidades.
-* `📁 internal/worker`: Orquestrador de threads para processamento paralelo.
+- Arquitetura modular
+- Alta performance
+- Escalabilidade
+- Facilidade de extensão via plugins
 
 ---
 
-## 🛠️ Instalação e Build
+# 🚀 Features Atuais
 
-> [!IMPORTANT]
-> Este é um software de uso **privado e comercial**. Certifique-se de possuir as permissões necessárias antes de prosseguir.
+✅ Plugin Engine (modular)  
+✅ Worker Pool (execução paralela)  
+✅ HTTP Engine profissional (timeout, headers, redirect control)  
+✅ Subdomain Discovery (bruteforce inicial)  
+✅ CLI moderna  
+✅ Multi-target scanning  
 
-**1. Clonar o Repositório Privado:**
+---
+
+# 🧠 Arquitetura
+
+```
+
+CLI
+↓
+Worker Pool
+↓
+Plugin Engine
+↓
+HTTP Engine
+↓
+Findings
+
+````
+
+---
+
+# ⚙️ Instalação
+
 ```bash
-git clone [https://github.com/leomarqueseh/BlueGuard.git](https://github.com/leomarqueseh/BlueGuard.git)
+git clone https://github.com/leomarqueseh/BlueGuard.git
 cd BlueGuard
-2. Compilar o Binário Otimizado:
-
-Bash
+go mod tidy
 CGO_ENABLED=0 go build -o blueguard ./cmd/blueguard
-💻 Guia de Uso
-🔍 Escaneamento de Alvo Único
-Ideal para validações rápidas em um endpoint específico.
+````
 
-Bash
-./blueguard -u [https://alvo-cliente.com.br](https://alvo-cliente.com.br)
-📊 Escaneamento em Lote (Bulk Scan)
-Para mapear toda uma infraestrutura a partir de uma lista.
+---
 
-Bash
-./blueguard -l targets.txt -w 100
-Dica: Utilize a flag -w para ajustar o número de workers simultâneos.
+# 🧪 Uso
 
-📝 Exemplo de Relatório Técnico
-Plaintext
-[🔴 HIGH] Git Repository Exposed
-📍 Target: [https://client-api.com](https://client-api.com)
-⚠️ Evidence: .git/config accessible. Potential source code leak.
+## 🔹 Scan único
 
-[🟡 MEDIUM] Possible Open Redirect
-📍 Target: [https://client-api.com](https://client-api.com)
-⚠️ Evidence: Parameter 'redirect' allows external URLs.
-🗺️ Roadmap de Desenvolvimento (Enterprise)
-[ ] Subdomain Discovery: Mapeamento automático de subdomínios.
+```bash
+./blueguard -u https://example.com
+```
 
-[ ] Tech Fingerprinting: Identificação de linguagens e servidores.
+---
 
-[ ] Passive Recon: Coleta de dados sem interação direta com o alvo.
+## 🔹 Lista de alvos
 
-[ ] Custom Templates: Criação de regras de detecção via YAML/JSON.
+```bash
+./blueguard -l targets.txt
+```
 
-[ ] Relatórios Executivos: Exportação em PDF para apresentação a clientes.
+---
 
-🔐 Termos e Licenciamento
-SOFTWARE PROPRIETÁRIO
+## 🔹 Descoberta de subdomínios
 
-O BlueGuard é um serviço comercial. O uso, distribuição ou engenharia reversa deste binário sem contrato prévio é estritamente proibido e protegido por leis de propriedade intelectual.
+```bash
+./blueguard -d example.com
+```
 
-© 2024 BlueGuard Security | Todos os direitos reservados.
+---
+
+## 🔹 Configurações
+
+```bash
+-u string      Target URL
+-l string      File with targets
+-d string      Domain for discovery
+-w int         Workers (default: 10)
+-timeout int   Timeout in seconds (default: 10)
+-ua string     User-Agent
+```
+
+---
+
+# 🔍 Plugins Atuais
+
+### 🔥 Git Exposed
+
+Detecta exposição de repositórios `.git`
+
+### 🔥 Open Redirect
+
+Detecta possíveis redirecionamentos abertos
+
+### 🔥 Header Exposure
+
+Detecta exposição de headers sensíveis (ex: Server)
+
+---
+
+# 📁 Estrutura do Projeto
+
+```
+internal/
+  plugins/        → Plugins de segurança
+  worker/         → Pool de execução paralela
+  httpclient/     → HTTP Engine
+  recon/          → Descoberta de ativos
+  core/           → Contexto e base do scanner
+  scanner/        → Tipos e engine
+```
+
+---
+
+# ⚡ Exemplo de Output
+
+```
+[MEDIUM] Possible Open Redirect
+Target: https://example.com
+Parameter may allow redirection
+
+[LOW] Server Header Exposed
+Target: https://example.com
+cloudflare
+```
+
+---
+
+# 🧩 Criando um Plugin
+
+```go
+type Plugin interface {
+    Name() string
+    Run(ctx *core.ScanContext, target scanner.Target) ([]scanner.Finding, error)
+}
+```
+
+Exemplo:
+
+```go
+resp, err := ctx.Client.Get(target.URL, ctx.UserAgent)
+```
+
+---
+
+# 🛠️ Roadmap
+
+## 🔹 Fase 1 (Atual)
+
+* Plugin Engine
+* HTTP Engine
+* Worker Pool
+* CLI funcional
+
+---
+
+## 🔹 Fase 2 (Curto prazo)
+
+* Fingerprinting Engine (detecção de tecnologia)
+* Melhor Subdomain Discovery (paralelo + fontes passivas)
+* Output em JSON
+* Logging estruturado
+
+---
+
+## 🔹 Fase 3 (Médio prazo)
+
+* Asset Graph (mapa de ativos)
+* Risk Engine (correlação de vulnerabilidades)
+* API REST
+* Dashboard web
+
+---
+
+## 🔹 Fase 4 (Longo prazo)
+
+* Multi-tenant (SaaS)
+* Distributed Workers
+* Agent interno (on-premise scanning)
+* Compliance Engine (PCI, ISO, etc)
+* Sistema de scoring (CVSS-like)
+
+---
+
+# 🎯 Objetivo Final
+
+Transformar o BlueGuard em uma plataforma completa de segurança:
+
+```
+Scanner → Plataforma → SaaS
+```
+
+---
+
+# ⚠️ Aviso
+
+Este projeto é para fins educacionais e pesquisa em segurança.
+Use apenas em ambientes autorizados.
+
+---
+
+# 👨‍💻 Autor
+
+Leonardo Marques
+
+---
+
+# ⭐ Contribuição
+
+Pull requests são bem-vindos!
+
+---
+
+# 📌 Status
+
+🚧 Em desenvolvimento ativo
+
+````
