@@ -1,11 +1,3 @@
-Perfeito — vou te entregar um **README.md completo, profissional e pronto pra GitHub**, refletindo exatamente o estado atual do projeto + roadmap estratégico.
-
-Você só precisa copiar e colar. 👇
-
----
-
-# 📄 README.md (COMPLETO)
-
 ```markdown
 # 🛡️ BlueGuard
 
