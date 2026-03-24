@@ -10,10 +10,12 @@ import (
 	"time"
 
 	"github.com/leomarqueseh/BlueGuard/internal/core"
+	"github.com/leomarqueseh/BlueGuard/internal/dashboard"
 	"github.com/leomarqueseh/BlueGuard/internal/httpclient"
 	"github.com/leomarqueseh/BlueGuard/internal/i18n"
 	"github.com/leomarqueseh/BlueGuard/internal/plugins"
 	"github.com/leomarqueseh/BlueGuard/internal/recon"
+	"github.com/leomarqueseh/BlueGuard/internal/report"
 	"github.com/leomarqueseh/BlueGuard/internal/risk"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 	"github.com/leomarqueseh/BlueGuard/internal/worker"
@@ -58,8 +60,16 @@ func main() {
 	userAgent := flag.String("ua", "BlueGuard", "User-Agent")
 	lang := flag.String("lang", "en", "Language (en|pt-BR)")
 	jsonOutput := flag.Bool("json", false, "Output JSON")
+	htmlOutput := flag.String("html", "", "Output HTML file")
+	web := flag.Bool("web", false, "Start web dashboard")
 
 	flag.Parse()
+
+	// 🔥 Dashboard mode
+	if *web {
+		dashboard.Start()
+		return
+	}
 
 	// 🔥 idioma
 	i18n.Lang = *lang
@@ -70,7 +80,7 @@ func main() {
 		return
 	}
 
-	// 🔥 contexto do scan
+	// 🔥 contexto
 	scanCtx := &core.ScanContext{
 		Timeout:   time.Duration(*timeout) * time.Second,
 		UserAgent: *userAgent,
@@ -87,7 +97,7 @@ func main() {
 		targets = append(targets, scanner.Target{URL: *target})
 	}
 
-	// 🔹 lista de targets
+	// 🔹 lista
 	if *list != "" {
 		fileTargets, err := loadTargets(*list)
 		if err != nil {
@@ -97,7 +107,7 @@ func main() {
 		targets = append(targets, fileTargets...)
 	}
 
-	// 🔹 descoberta de subdomínios
+	// 🔹 descoberta
 	if *domain != "" {
 
 		fmt.Println("[*] Discovering subdomains...")
@@ -115,17 +125,17 @@ func main() {
 	reg := plugins.NewRegistry()
 	fmt.Println("[*] Plugins loaded:", len(reg.All()))
 
-	// 🔥 worker pool
+	// 🔥 worker
 	pool := worker.NewPool(reg.All(), *workers, scanCtx)
 
-	// 🔥 execução do scan
+	// 🔥 scan
 	findings := pool.Run(ctx, targets)
 
-	// 🔥 risk engine + score
+	// 🔥 risk + score
 	riskEngine := risk.New()
 	findings = riskEngine.Analyze(findings)
 
-	// 🔹 JSON output (PROFISSIONAL)
+	// 🔹 JSON
 	if *jsonOutput {
 		out, err := json.MarshalIndent(findings, "", "  ")
 		if err != nil {
@@ -133,6 +143,18 @@ func main() {
 			return
 		}
 		fmt.Println(string(out))
+		return
+	}
+
+	// 🔹 HTML
+	if *htmlOutput != "" {
+		err := report.GenerateHTML(findings, *htmlOutput)
+		if err != nil {
+			fmt.Println("Error generating HTML:", err)
+			return
+		}
+
+		fmt.Println("[+] HTML report saved:", *htmlOutput)
 		return
 	}
 

@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BlueGuard Report</title>
+<style>
+body {
+	font-family: Arial;
+	background: #0d1117;
+	color: #c9d1d9;
+}
+.container {
+	width: 80%;
+	margin: auto;
+}
+.card {
+	border-radius: 8px;
+	padding: 15px;
+	margin: 10px 0;
+}
+.high { background: #ff4d4f; }
+.medium { background: #faad14; }
+.low { background: #1890ff; }
+.info { background: #52c41a; }
+h1 { text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>BlueGuard Security Report</h1>
+
+<div class="card medium">
+	<h2>Possible Open Redirect</h2>
+	<p><strong>Target:</strong> https://example.com</p>
+	<p><strong>Severity:</strong> MEDIUM</p>
+	<p><strong>Score:</strong> 6.5</p>
+	<p>Parameter may allow redirection</p>
+</div>
+
+<div class="card info">
+	<h2>Server Header Exposed</h2>
+	<p><strong>Target:</strong> https://example.com</p>
+	<p><strong>Severity:</strong> INFO</p>
+	<p><strong>Score:</strong> 1.0</p>
+	<p>cloudflare</p>
+</div>
+
+<div class="card info">
+	<h2>Technology Fingerprint</h2>
+	<p><strong>Target:</strong> https://example.com</p>
+	<p><strong>Severity:</strong> INFO</p>
+	<p><strong>Score:</strong> 1.0</p>
+	<p>Detected: [cloudflare]</p>
+</div>
+
+</div>
+</body>
+</html>
