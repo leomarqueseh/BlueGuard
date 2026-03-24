@@ -5,14 +5,9 @@ type Target struct {
 }
 
 type Finding struct {
-	Title       string
-	Description string
-	Severity    string
-	Target      string
-	Evidence    string
-}
-
-type ScanResult struct {
-	Target   string
-	Findings []Finding
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Severity    string `json:"severity"`
+	Target      string `json:"target"`
+	Score       float64 `json:"score"`
 }

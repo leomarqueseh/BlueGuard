@@ -19,7 +19,6 @@ func (r *Engine) Analyze(findings []scanner.Finding) []scanner.Finding {
 	hasApache := false
 	hasCloudflare := false
 
-	// 🔍 Detectar tecnologias
 	for _, f := range findings {
 
 		if f.Title == "Technology Fingerprint" {
@@ -36,22 +35,22 @@ func (r *Engine) Analyze(findings []scanner.Finding) []scanner.Finding {
 		}
 	}
 
-	// 🔥 Aplicar regras de risco
 	for _, f := range findings {
 
 		newSeverity := f.Severity
 
-		// Open Redirect + Apache → HIGH
 		if f.Title == "Possible Open Redirect" && hasApache {
 			newSeverity = "HIGH"
 		}
 
-		// Header exposure + Cloudflare → reduzir risco
 		if f.Title == "Server Header Exposed" && hasCloudflare {
 			newSeverity = "INFO"
 		}
 
 		f.Severity = newSeverity
+
+		// 🔥 SCORE
+		f.Score = CalculateScore(f)
 
 		enhanced = append(enhanced, f)
 	}

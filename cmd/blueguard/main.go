@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -56,19 +57,20 @@ func main() {
 	timeout := flag.Int("timeout", 10, "Timeout seconds")
 	userAgent := flag.String("ua", "BlueGuard", "User-Agent")
 	lang := flag.String("lang", "en", "Language (en|pt-BR)")
+	jsonOutput := flag.Bool("json", false, "Output JSON")
 
 	flag.Parse()
 
-	// 🔥 Definir idioma
+	// 🔥 idioma
 	i18n.Lang = *lang
 
-	// 🔴 Validação
+	// 🔴 validação
 	if *target == "" && *list == "" && *domain == "" {
 		fmt.Println("Use -u OR -l OR -d")
 		return
 	}
 
-	// 🔥 Contexto do scan
+	// 🔥 contexto do scan
 	scanCtx := &core.ScanContext{
 		Timeout:   time.Duration(*timeout) * time.Second,
 		UserAgent: *userAgent,
@@ -80,12 +82,12 @@ func main() {
 
 	var targets []scanner.Target
 
-	// 🔹 Target único
+	// 🔹 target único
 	if *target != "" {
 		targets = append(targets, scanner.Target{URL: *target})
 	}
 
-	// 🔹 Lista de targets
+	// 🔹 lista de targets
 	if *list != "" {
 		fileTargets, err := loadTargets(*list)
 		if err != nil {
@@ -95,7 +97,7 @@ func main() {
 		targets = append(targets, fileTargets...)
 	}
 
-	// 🔹 Descoberta de subdomínios
+	// 🔹 descoberta de subdomínios
 	if *domain != "" {
 
 		fmt.Println("[*] Discovering subdomains...")
@@ -109,28 +111,40 @@ func main() {
 		fmt.Println("[*] Found:", len(discovered))
 	}
 
-	// 🔥 Plugins
+	// 🔥 plugins
 	reg := plugins.NewRegistry()
 	fmt.Println("[*] Plugins loaded:", len(reg.All()))
 
-	// 🔥 Worker Pool
+	// 🔥 worker pool
 	pool := worker.NewPool(reg.All(), *workers, scanCtx)
 
-	// 🔥 Execução do scan
+	// 🔥 execução do scan
 	findings := pool.Run(ctx, targets)
 
-	// 🔥 Risk Engine
+	// 🔥 risk engine + score
 	riskEngine := risk.New()
 	findings = riskEngine.Analyze(findings)
 
-	// 🔹 Output final
+	// 🔹 JSON output (PROFISSIONAL)
+	if *jsonOutput {
+		out, err := json.MarshalIndent(findings, "", "  ")
+		if err != nil {
+			fmt.Println("Error generating JSON:", err)
+			return
+		}
+		fmt.Println(string(out))
+		return
+	}
+
+	// 🔹 output padrão
 	for _, f := range findings {
 
 		fmt.Printf(
-			"\n[%s] %s\nTarget: %s\n%s\n",
-			i18n.Severity(f.Severity), // 🔥 tradução aplicada aqui
+			"\n[%s] %s\nTarget: %s\nScore: %.1f\n%s\n",
+			i18n.Severity(f.Severity),
 			f.Title,
 			f.Target,
+			f.Score,
 			f.Description,
 		)
 	}

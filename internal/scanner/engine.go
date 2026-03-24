@@ -1,44 +1,41 @@
 package scanner
 
-import "context"
+import (
+	"github.com/leomarqueseh/BlueGuard/internal/core"
+)
 
-type Plugin interface {
-	Name() string
-	Run(ctx context.Context, target Target) ([]Finding, error)
-}
-
+// Engine executa plugins em um target
 type Engine struct {
 	plugins []Plugin
 }
 
-func NewEngine(p []Plugin) *Engine {
+// Plugin interface
+type Plugin interface {
+	Name() string
+	Run(ctx *core.ScanContext, target Target) ([]Finding, error)
+}
+
+// NewEngine cria engine
+func NewEngine(plugins []Plugin) *Engine {
 	return &Engine{
-		plugins: p,
+		plugins: plugins,
 	}
 }
 
-func (e *Engine) Scan(ctx context.Context, target Target) (*ScanResult, error) {
+// Scan executa todos plugins e retorna findings
+func (e *Engine) Scan(ctx *core.ScanContext, target Target) []Finding {
 
-	result := &ScanResult{
-		Target:   target.URL,
-		Findings: []Finding{},
-	}
+	var findings []Finding
 
 	for _, plugin := range e.plugins {
 
-		select {
-		case <-ctx.Done():
-			return result, ctx.Err()
-		default:
-		}
-
-		findings, err := plugin.Run(ctx, target)
+		result, err := plugin.Run(ctx, target)
 		if err != nil {
 			continue
 		}
 
-		result.Findings = append(result.Findings, findings...)
+		findings = append(findings, result...)
 	}
 
-	return result, nil
+	return findings
 }
