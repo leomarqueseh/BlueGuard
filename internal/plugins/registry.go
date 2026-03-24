@@ -11,7 +11,7 @@ func NewRegistry() *Registry {
 	r.Register(&GitExposed{})
 	r.Register(&OpenRedirect{})
 	r.Register(&HeaderExposure{})
-
+	r.Register(&Fingerprint{})
 	return r
 }
 

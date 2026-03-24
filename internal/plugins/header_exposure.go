@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"github.com/leomarqueseh/BlueGuard/internal/core"
+	"github.com/leomarqueseh/BlueGuard/internal/i18n"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 )
 
@@ -23,7 +24,7 @@ func (h *HeaderExposure) Run(ctx *core.ScanContext, target scanner.Target) ([]sc
 	if server := resp.Headers.Get("Server"); server != "" {
 
 		findings = append(findings, scanner.Finding{
-			Title:       "Server Header Exposed",
+			Title:       i18n.T("header_exposed_title"),
 			Description: server,
 			Severity:    "LOW",
 			Target:      target.URL,

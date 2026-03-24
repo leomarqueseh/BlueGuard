@@ -10,12 +10,15 @@ import (
 
 	"github.com/leomarqueseh/BlueGuard/internal/core"
 	"github.com/leomarqueseh/BlueGuard/internal/httpclient"
+	"github.com/leomarqueseh/BlueGuard/internal/i18n"
 	"github.com/leomarqueseh/BlueGuard/internal/plugins"
 	"github.com/leomarqueseh/BlueGuard/internal/recon"
+	"github.com/leomarqueseh/BlueGuard/internal/risk"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 	"github.com/leomarqueseh/BlueGuard/internal/worker"
 )
 
+// 🔹 Carregar targets de arquivo
 func loadTargets(file string) ([]scanner.Target, error) {
 
 	var targets []scanner.Target
@@ -26,10 +29,11 @@ func loadTargets(file string) ([]scanner.Target, error) {
 	}
 	defer f.Close()
 
-	scannerFile := bufio.NewScanner(f)
+	sc := bufio.NewScanner(f)
 
-	for scannerFile.Scan() {
-		line := scannerFile.Text()
+	for sc.Scan() {
+		line := sc.Text()
+
 		if line == "" {
 			continue
 		}
@@ -44,21 +48,27 @@ func loadTargets(file string) ([]scanner.Target, error) {
 
 func main() {
 
+	// 🔹 Flags
 	target := flag.String("u", "", "Target URL")
 	list := flag.String("l", "", "Targets list file")
-	domain := flag.String("d", "", "Domain for subdomain discovery")
-	workers := flag.Int("w", 10, "Number of workers")
+	domain := flag.String("d", "", "Domain for discovery")
+	workers := flag.Int("w", 10, "Workers")
 	timeout := flag.Int("timeout", 10, "Timeout seconds")
 	userAgent := flag.String("ua", "BlueGuard", "User-Agent")
+	lang := flag.String("lang", "en", "Language (en|pt-BR)")
 
 	flag.Parse()
 
+	// 🔥 Definir idioma
+	i18n.Lang = *lang
+
+	// 🔴 Validação
 	if *target == "" && *list == "" && *domain == "" {
 		fmt.Println("Use -u OR -l OR -d")
 		return
 	}
 
-	// 🔥 ScanContext PROFISSIONAL
+	// 🔥 Contexto do scan
 	scanCtx := &core.ScanContext{
 		Timeout:   time.Duration(*timeout) * time.Second,
 		UserAgent: *userAgent,
@@ -70,10 +80,12 @@ func main() {
 
 	var targets []scanner.Target
 
+	// 🔹 Target único
 	if *target != "" {
 		targets = append(targets, scanner.Target{URL: *target})
 	}
 
+	// 🔹 Lista de targets
 	if *list != "" {
 		fileTargets, err := loadTargets(*list)
 		if err != nil {
@@ -83,8 +95,11 @@ func main() {
 		targets = append(targets, fileTargets...)
 	}
 
+	// 🔹 Descoberta de subdomínios
 	if *domain != "" {
+
 		fmt.Println("[*] Discovering subdomains...")
+
 		discovered := recon.Discover(*domain)
 
 		for _, d := range discovered {
@@ -94,17 +109,26 @@ func main() {
 		fmt.Println("[*] Found:", len(discovered))
 	}
 
+	// 🔥 Plugins
 	reg := plugins.NewRegistry()
+	fmt.Println("[*] Plugins loaded:", len(reg.All()))
 
+	// 🔥 Worker Pool
 	pool := worker.NewPool(reg.All(), *workers, scanCtx)
 
+	// 🔥 Execução do scan
 	findings := pool.Run(ctx, targets)
 
+	// 🔥 Risk Engine
+	riskEngine := risk.New()
+	findings = riskEngine.Analyze(findings)
+
+	// 🔹 Output final
 	for _, f := range findings {
 
 		fmt.Printf(
 			"\n[%s] %s\nTarget: %s\n%s\n",
-			f.Severity,
+			i18n.Severity(f.Severity), // 🔥 tradução aplicada aqui
 			f.Title,
 			f.Target,
 			f.Description,

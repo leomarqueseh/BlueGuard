@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/leomarqueseh/BlueGuard/internal/core"
+	"github.com/leomarqueseh/BlueGuard/internal/i18n"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 )
 
@@ -27,8 +28,8 @@ func (o *OpenRedirect) Run(ctx *core.ScanContext, target scanner.Target) ([]scan
 	if strings.Contains(resp.URL, "evil.com") {
 
 		findings = append(findings, scanner.Finding{
-			Title:       "Possible Open Redirect",
-			Description: "Parameter may allow redirection",
+			Title:       i18n.T("open_redirect_title"),
+			Description: i18n.T("open_redirect_desc"),
 			Severity:    "MEDIUM",
 			Target:      target.URL,
 		})
