@@ -15,9 +15,7 @@ import (
 
 var results []scanner.Finding
 
-// 🚀 Start server
 func Start() {
-
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/scan", scanHandler)
 	http.HandleFunc("/results", resultsHandler)
@@ -26,33 +24,33 @@ func Start() {
 	http.ListenAndServe(":8080", nil)
 }
 
-// 🔹 HOME
+// HOME
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	html := `
 <!DOCTYPE html>
 <html>
 <head>
-<title>BlueGuard Dashboard</title>
+<title>BlueGuard</title>
 <style>
 body {
-	font-family: Arial;
 	background:#0d1117;
 	color:#c9d1d9;
+	font-family:Arial;
 	text-align:center;
 }
 input {
-	padding:10px;
-	width:300px;
-	border-radius:5px;
+	padding:12px;
+	width:320px;
+	border-radius:6px;
 	border:none;
 }
 button {
-	padding:10px;
-	border:none;
-	background:#58a6ff;
+	padding:12px;
+	background:#238636;
 	color:white;
-	border-radius:5px;
+	border:none;
+	border-radius:6px;
 	cursor:pointer;
 }
 </style>
@@ -63,11 +61,11 @@ button {
 
 <form action="/scan">
 <input name="target" placeholder="https://example.com"/>
-<button type="submit">Scan</button>
+<button>Scan</button>
 </form>
 
 <br>
-<a href="/results">View Results</a>
+<a href="/results">Ver resultados</a>
 
 </body>
 </html>
@@ -75,15 +73,10 @@ button {
 	w.Write([]byte(html))
 }
 
-// 🔹 SCAN
+// SCAN
 func scanHandler(w http.ResponseWriter, r *http.Request) {
 
 	target := r.URL.Query().Get("target")
-
-	if target == "" {
-		w.Write([]byte("Missing target"))
-		return
-	}
 
 	ctx := &core.ScanContext{
 		Timeout:   10 * time.Second,
@@ -99,137 +92,181 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	findings := pool.Run(r.Context(), targets)
-
-	riskEngine := risk.New()
-	findings = riskEngine.Analyze(findings)
-
-	// 🔥 evita null
-	if findings == nil {
-		findings = []scanner.Finding{}
-	}
+	findings = risk.New().Analyze(findings)
 
 	results = findings
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
-// 🔹 RESULTS (UI PROFISSIONAL)
+// RESULTS (NESSUS STYLE)
 func resultsHandler(w http.ResponseWriter, r *http.Request) {
 
-	if results == nil {
-		results = []scanner.Finding{}
-	}
-
-	var cards string
-
-	// 🔥 contadores
 	var high, medium, low, info int
 
 	for _, f := range results {
-
-		color := "#52c41a"
-		badge := "INFO"
-
 		switch f.Severity {
 		case "HIGH":
-			color = "#ff4d4f"
-			badge = "HIGH"
 			high++
 		case "MEDIUM":
-			color = "#faad14"
-			badge = "MEDIUM"
 			medium++
 		case "LOW":
-			color = "#1890ff"
-			badge = "LOW"
 			low++
 		default:
 			info++
 		}
+	}
 
-		cards += fmt.Sprintf(`
-		<div class="card" style="border-left: 5px solid %s;">
-			<div class="badge" style="background:%s;">%s</div>
-			<h2>%s</h2>
-			<p><strong>Target:</strong> %s</p>
-			<p><strong>Score:</strong> %.1f</p>
-			<p>%s</p>
-		</div>
-		`, color, color, badge, f.Title, f.Target, f.Score, f.Description)
+	var rows string
+
+	for _, f := range results {
+
+		color := "#3fb950"
+
+		switch f.Severity {
+		case "HIGH":
+			color = "#f85149"
+		case "MEDIUM":
+			color = "#d29922"
+		case "LOW":
+			color = "#58a6ff"
+		}
+
+		rows += fmt.Sprintf(`
+<tr>
+<td>%s</td>
+<td><span style="color:%s;font-weight:bold;">%s</span></td>
+<td>%.1f</td>
+<td><a href="%s" target="_blank">%s</a></td>
+</tr>
+`, f.Title, color, f.Severity, f.Score, f.Target, f.Target)
 	}
 
 	html := fmt.Sprintf(`
 <!DOCTYPE html>
 <html>
 <head>
-<title>BlueGuard Results</title>
+<meta charset="UTF-8">
+<title>BlueGuard Dashboard</title>
+
 <style>
 body {
-	font-family: Arial;
-	background: #0d1117;
-	color: #c9d1d9;
+	margin:0;
+	font-family:Arial;
+	background:#0d1117;
+	color:#c9d1d9;
+	display:flex;
 }
-.container {
-	width: 80%%;
-	margin: auto;
+
+/* SIDEBAR */
+.sidebar {
+	width:220px;
+	background:#161b22;
+	height:100vh;
+	padding:20px;
 }
-.header {
-	text-align: center;
-	margin-bottom: 20px;
+.sidebar h2 {
+	color:#58a6ff;
 }
-.summary span {
-	margin: 0 10px;
-	font-weight: bold;
+.sidebar a {
+	display:block;
+	color:#c9d1d9;
+	margin:10px 0;
+	text-decoration:none;
+}
+
+/* MAIN */
+.main {
+	flex:1;
+	padding:30px;
+}
+
+/* TITLE */
+h1 {
+	margin-bottom:20px;
+}
+
+/* CARDS */
+.cards {
+	display:flex;
+	gap:20px;
+	margin-bottom:30px;
 }
 .card {
-	background: #161b22;
-	padding: 20px;
-	margin: 15px 0;
-	border-radius: 10px;
-	box-shadow: 0 0 10px rgba(0,0,0,0.5);
-	position: relative;
+	flex:1;
+	padding:20px;
+	border-radius:10px;
+	text-align:center;
+	font-weight:bold;
+	font-size:18px;
 }
-.badge {
-	position: absolute;
-	top: 15px;
-	right: 15px;
-	padding: 5px 10px;
-	border-radius: 5px;
-	color: white;
-	font-size: 12px;
+.high { background:#f85149; }
+.medium { background:#d29922; }
+.low { background:#58a6ff; }
+.info { background:#3fb950; }
+
+/* TABLE */
+table {
+	width:100%%;
+	border-collapse:collapse;
+	background:#161b22;
+	border-radius:10px;
+	overflow:hidden;
 }
-h1 {
-	text-align: center;
+th {
+	background:#21262d;
+	padding:12px;
+	text-align:left;
 }
+td {
+	padding:12px;
+	border-bottom:1px solid #30363d;
+}
+tr:hover {
+	background:#21262d;
+}
+
 a {
-	color: #58a6ff;
+	color:#58a6ff;
+	text-decoration:none;
 }
 </style>
+
 </head>
 <body>
 
-<div class="container">
-
-<div class="header">
-	<h1>Scan Results</h1>
-	<div class="summary">
-		<span style="color:#ff4d4f;">HIGH: %d</span>
-		<span style="color:#faad14;">MEDIUM: %d</span>
-		<span style="color:#1890ff;">LOW: %d</span>
-		<span style="color:#52c41a;">INFO: %d</span>
-	</div>
+<div class="sidebar">
+	<h2>BlueGuard</h2>
+	<a href="/">🏠 Home</a>
+	<a href="/results">📊 Results</a>
 </div>
 
-%s
+<div class="main">
 
-<br>
-<a href="/">← Back</a>
+<h1>Security Dashboard</h1>
+
+<div class="cards">
+	<div class="card high">HIGH<br>%d</div>
+	<div class="card medium">MEDIUM<br>%d</div>
+	<div class="card low">LOW<br>%d</div>
+	<div class="card info">INFO<br>%d</div>
+</div>
+
+<table>
+<tr>
+<th>Vulnerability</th>
+<th>Severity</th>
+<th>Score</th>
+<th>Target</th>
+</tr>
+%s
+</table>
 
 </div>
 
 </body>
 </html>
-`, high, medium, low, info, cards)
+`, high, medium, low, info, rows)
 
 	w.Write([]byte(html))
 }

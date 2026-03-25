@@ -1,6 +1,12 @@
 package plugins
 
 import (
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/leomarqueseh/BlueGuard/internal/core"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 )
@@ -15,21 +21,51 @@ func (g *GitExposed) Run(ctx *core.ScanContext, target scanner.Target) ([]scanne
 
 	var findings []scanner.Finding
 
-	url := target.URL + "/.git/config"
-
-	resp, err := ctx.Client.Get(url, ctx.UserAgent)
-	if err != nil {
-		return findings, nil
+	client := &http.Client{
+		Timeout: 10 * time.Second,
 	}
 
-	if resp.StatusCode == 200 {
+	paths := []string{
+		"/.git/HEAD",
+		"/.git/config",
+	}
 
-		findings = append(findings, scanner.Finding{
-			Title:       "Git Repository Exposed",
-			Description: ".git/config accessible",
-			Severity:    "HIGH",
-			Target:      target.URL,
-		})
+	for _, path := range paths {
+
+		url := strings.TrimRight(target.URL, "/") + path
+
+		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Set("User-Agent", ctx.UserAgent)
+
+		resp, err := client.Do(req)
+		if err != nil {
+			continue
+		}
+		defer resp.Body.Close()
+
+		// precisa ser 200 OK
+		if resp.StatusCode != 200 {
+			continue
+		}
+
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		body := string(bodyBytes)
+
+		// 🔥 VALIDAÇÃO REAL
+		if strings.Contains(body, "ref: refs/heads") ||
+			strings.Contains(body, "[core]") {
+
+			findings = append(findings, scanner.Finding{
+				Title:       "Git Repository Exposed (CONFIRMED)",
+				Description: fmt.Sprintf("Sensitive git file exposed: %s", path),
+				Severity:    "HIGH",
+				Target:      url,
+				Score:       9.5,
+				Confirmed:   true,
+			})
+
+			return findings, nil
+		}
 	}
 
 	return findings, nil

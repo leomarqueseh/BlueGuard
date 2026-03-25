@@ -5,9 +5,12 @@ type Target struct {
 }
 
 type Finding struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Severity    string `json:"severity"`
-	Target      string `json:"target"`
-	Score       float64 `json:"score"`
+	Title       string
+	Description string
+	Severity    string
+	Target      string
+	Score       float64
+
+	// 🔥 NOVO (PoC)
+	Confirmed bool
 }

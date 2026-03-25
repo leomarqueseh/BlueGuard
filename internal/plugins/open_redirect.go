@@ -1,10 +1,13 @@
 package plugins
 
 import (
+	"fmt"
+	"net/http"
+	"net/url"
 	"strings"
+	"time"
 
 	"github.com/leomarqueseh/BlueGuard/internal/core"
-	"github.com/leomarqueseh/BlueGuard/internal/i18n"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 )
 
@@ -18,21 +21,65 @@ func (o *OpenRedirect) Run(ctx *core.ScanContext, target scanner.Target) ([]scan
 
 	var findings []scanner.Finding
 
-	testURL := target.URL + "?redirect=https://evil.com"
-
-	resp, err := ctx.Client.Get(testURL, ctx.UserAgent)
+	parsed, err := url.Parse(target.URL)
 	if err != nil {
 		return findings, nil
 	}
 
-	if strings.Contains(resp.URL, "evil.com") {
+	query := parsed.Query()
 
-		findings = append(findings, scanner.Finding{
-			Title:       i18n.T("open_redirect_title"),
-			Description: i18n.T("open_redirect_desc"),
-			Severity:    "MEDIUM",
-			Target:      target.URL,
-		})
+	params := []string{"url", "redirect", "next", "dest", "return", "redir"}
+
+	// 🔥 client REAL com redirect control
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			// não seguir redirect automaticamente
+			return http.ErrUseLastResponse
+		},
+	}
+
+	for _, p := range params {
+
+		query.Set(p, "https://evil.com")
+		parsed.RawQuery = query.Encode()
+
+		testURL := parsed.String()
+
+		req, _ := http.NewRequest("GET", testURL, nil)
+		req.Header.Set("User-Agent", ctx.UserAgent)
+
+		resp, err := client.Do(req)
+		if err != nil {
+			continue
+		}
+		defer resp.Body.Close()
+
+		// 🔥 VALIDAÇÃO REAL
+		location := resp.Header.Get("Location")
+
+		if strings.Contains(location, "evil.com") {
+			findings = append(findings, scanner.Finding{
+				Title:       "Open Redirect (CONFIRMED)",
+				Description: fmt.Sprintf("Confirmed via parameter '%s' redirecting to external domain", p),
+				Severity:    "HIGH",
+				Target:      testURL,
+				Score:       9.0,
+				Confirmed:   true,
+			})
+			return findings, nil
+		}
+
+		if resp.StatusCode >= 300 && resp.StatusCode < 400 {
+			findings = append(findings, scanner.Finding{
+				Title:       "Possible Open Redirect",
+				Description: fmt.Sprintf("Parameter '%s' may allow redirection (not confirmed)", p),
+				Severity:    "MEDIUM",
+				Target:      testURL,
+				Score:       6.5,
+				Confirmed:   false,
+			})
+		}
 	}
 
 	return findings, nil
