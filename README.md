@@ -1,57 +1,64 @@
-# 🛡️ BlueGuard
+# 🔐 BlueGuard
 
-BlueGuard é uma ferramenta de segurança ofensiva focada em **detecção automatizada de vulnerabilidades web**, com arquitetura moderna, modular e preparada para evoluir para uma plataforma completa.
-
----
-
-## 🚀 Features
-
-- 🔍 Scanner de vulnerabilidades web
-- ⚙️ Arquitetura modular (plugins)
-- ⚡ Engine com concorrência (workers)
-- 🌐 Dashboard web interativo
-- 📊 Relatório HTML profissional
-- 📦 Output em JSON (API-ready)
-- 🌍 Suporte a múltiplos targets
-- 🌐 Descoberta de subdomínios (base inicial)
-- 🧠 Risk Engine com scoring
+BlueGuard é uma ferramenta de segurança ofensiva (Web Security Scanner) desenvolvida em Go, com foco em detecção e validação real de vulnerabilidades (PoC), inspirada em ferramentas como Nessus.
 
 ---
 
-## 🧪 Vulnerabilidades detectadas
+## 🚀 Features atuais
 
-- Open Redirect
-- Exposição de Headers
-- Fingerprint de Tecnologias
-- Git Exposure (em evolução)
-- Subdomain Takeover (base)
+- 🔍 Scan de aplicações web
+- ⚙️ Engine modular baseada em plugins
+- 🧠 Risk Engine (pontuação de vulnerabilidades)
+- 🌐 Dashboard Web (estilo SaaS)
+- 📄 Output em JSON
+- 🔎 Fingerprinting de tecnologias
+- 🛡️ Header Analysis
 
 ---
 
-## 🖥️ Dashboard Web
+## 🔥 Vulnerabilidades suportadas
 
-Interface web interativa para executar scans e visualizar resultados:
+### ✅ Open Redirect (PoC real)
+- Teste ativo com payload
+- Validação via header `Location`
+- Sem falso positivo
+
+### ✅ Git Exposed (CONFIRMED)
+- Detecta:
+  - `.git/HEAD`
+  - `.git/config`
+- Validação por conteúdo real
+
+### 🔥 Git Dump (CRITICAL)
+- Baixa arquivos sensíveis do repositório
+- Possível reconstrução do código fonte
+
+---
+
+## ⚠️ Aviso Legal
+
+Esta ferramenta deve ser utilizada apenas em:
+
+- Ambientes próprios
+- Laboratórios de teste
+- Programas de Bug Bounty autorizados
+
+Uso indevido pode violar leis como a LGPD e legislações de crimes digitais.
+
+---
+
+## 🖥️ Instalação
 
 ```bash
-./blueguard -web
+git clone https://github.com/leomarqueseh/BlueGuard.git
+cd BlueGuard
+go mod tidy
+go build -o blueguard ./cmd/blueguard
 ````
-
-Acesse:
-
-```
-http://localhost:8080
-```
-
-### 🔥 Features do Dashboard
-
-* Visual estilo Nessus
-* Cards por vulnerabilidade
-* Cores por severidade
-* Contador de riscos (HIGH / MEDIUM / LOW / INFO)
 
 ---
 
-## ⚙️ Uso via CLI
+## ▶️ Uso
 
 ### Scan simples
 
@@ -59,145 +66,57 @@ http://localhost:8080
 ./blueguard -u https://example.com
 ```
 
----
-
-### Lista de targets
+### Lista de alvos
 
 ```bash
 ./blueguard -l targets.txt
 ```
 
----
-
-### Descoberta de subdomínios
+### Dashboard Web
 
 ```bash
-./blueguard -d example.com
+./blueguard -web
+```
+
+Acesse:
+
+```
+http://localhost:8080
 ```
 
 ---
 
-### Output JSON
-
-```bash
-./blueguard -u https://example.com -json
-```
-
----
-
-### Relatório HTML
-
-```bash
-./blueguard -u https://example.com -html report.html
-```
-
----
-
-### Idioma
-
-```bash
-./blueguard -u https://example.com -lang pt-BR
-```
-
----
-
-## 🧠 Arquitetura
-
-```
-cmd/
- └── blueguard/
-
-internal/
- ├── core/
- ├── scanner/
- ├── plugins/
- ├── worker/
- ├── risk/
- ├── report/
- ├── recon/
- ├── httpclient/
- └── dashboard/
-```
-
----
-
-## ⚡ Engine
-
-* Execução paralela com workers
-* Sistema baseado em plugins
-* Pipeline:
-
-```
-Target → Plugins → Findings → Risk Engine → Output
-```
-
----
-
-## 📊 Exemplo de Output (JSON)
+## 📊 Exemplo de saída
 
 ```json
 [
   {
-    "title": "Possible Open Redirect",
-    "severity": "MEDIUM",
-    "score": 6.5
+    "title": "Git Repository Exposed (CONFIRMED)",
+    "severity": "HIGH",
+    "target": "https://target/.git/config",
+    "score": 9.5
   }
 ]
 ```
 
 ---
 
-## 🛣️ Roadmap
+## 🧠 Roadmap
 
-### 🔥 Curto prazo
-
-* [ ] Melhorar UI do dashboard
-* [ ] Ordenação por severidade
-* [ ] Expandir plugins
-
-### 🚀 Médio prazo
-
-* [ ] Banco de dados (SQLite)
-* [ ] Histórico de scans
+* [ ] Git full dump (reconstrução completa)
+* [ ] XSS detection (PoC)
+* [ ] SSRF detection
+* [ ] Directory Listing
+* [ ] Login system (SaaS)
 * [ ] API REST
-* [ ] Melhorar subdomain discovery
-
-### 🧠 Longo prazo
-
-* [ ] Plataforma SaaS
-* [ ] Multi-user
-* [ ] Integração com ferramentas externas
-* [ ] Machine learning para detecção
+* [ ] Histórico de scans (SQLite)
+* [ ] Export PDF
 
 ---
 
-## 🧑‍💻 Desenvolvimento
+## 👨‍💻 Autor
 
-```bash
-git clone https://github.com/seu-user/BlueGuard
-cd BlueGuard
-
-go mod tidy
-go build -o blueguard ./cmd/blueguard
-```
-
----
-
-## ⚠️ Aviso
-
-Ferramenta destinada apenas para:
-
-* Estudos
-* Laboratórios
-* Testes autorizados
-
-Não utilize sem permissão.
-
----
-
-## 📌 Status
-
-🚧 Em desenvolvimento ativo
+Leonardo Matheus Marques Ferreira
 
 ---
 
@@ -205,43 +124,158 @@ Não utilize sem permissão.
 
 Pull requests são bem-vindos!
 
----
-
-## 🏆 Autor
-
-Desenvolvido por você 😈
-
 ````
 
 ---
 
-# 🚀 AGORA FAZ ISSO
+# 🚀 AGORA: GIT DUMP COMPLETO (NÍVEL MONSTRO)
 
-```bash
-git add README.md
-git commit -m "docs: complete README with dashboard, features and roadmap"
-git push origin main
+---
+
+## 📁 `internal/plugins/git_dump.go` (COMPLETO)
+
+```go
+package plugins
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/leomarqueseh/BlueGuard/internal/core"
+	"github.com/leomarqueseh/BlueGuard/internal/scanner"
+)
+
+type GitDump struct{}
+
+func (g *GitDump) Name() string {
+	return "git_dump"
+}
+
+func (g *GitDump) Run(ctx *core.ScanContext, target scanner.Target) ([]scanner.Finding, error) {
+
+	var findings []scanner.Finding
+
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	base := strings.TrimRight(target.URL, "/")
+
+	files := []string{
+		"/.git/HEAD",
+		"/.git/config",
+		"/.git/index",
+	}
+
+	savePath := fmt.Sprintf("outputs/git/%s", sanitize(target.URL))
+	os.MkdirAll(savePath, os.ModePerm)
+
+	var downloaded int
+
+	for _, f := range files {
+
+		url := base + f
+
+		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Set("User-Agent", ctx.UserAgent)
+
+		resp, err := client.Do(req)
+		if err != nil {
+			continue
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			continue
+		}
+
+		body, _ := io.ReadAll(resp.Body)
+
+		if len(body) == 0 {
+			continue
+		}
+
+		fileName := filepath.Join(savePath, filepath.Base(f))
+
+		os.WriteFile(fileName, body, 0644)
+		downloaded++
+	}
+
+	if downloaded > 0 {
+		findings = append(findings, scanner.Finding{
+			Title:       "Git Repository Dumped",
+			Description: fmt.Sprintf("%d git files downloaded", downloaded),
+			Severity:    "CRITICAL",
+			Target:      target.URL,
+			Score:       10.0,
+			Confirmed:   true,
+		})
+	}
+
+	return findings, nil
+}
+
+// 🔥 sanitiza nome da pasta
+func sanitize(url string) string {
+	url = strings.ReplaceAll(url, "https://", "")
+	url = strings.ReplaceAll(url, "http://", "")
+	url = strings.ReplaceAll(url, "/", "_")
+	return url
+}
 ````
 
 ---
 
-# 🔥 DICA (IMPORTANTE)
+# ⚠️ REGISTRAR O PLUGIN
 
-Cria uma pasta:
+## 📁 `internal/plugins/registry.go`
 
-```bash
-mkdir docs
+Adicione:
+
+```go
+r.Register(&GitDump{})
 ```
 
-Salva o print que você mandou como:
+---
+
+# 🚀 BUILD
 
 ```bash
-docs/dashboard.png
+go clean
+go mod tidy
+rm -f blueguard
+CGO_ENABLED=0 go build -o blueguard ./cmd/blueguard
 ```
 
-E adiciona no README:
+---
 
-```md
-## 📊 Preview
+# ▶️ TESTE
 
-![dashboard](./docs/dashboard.png)
+```bash
+./blueguard -u https://target-vulnerable.com
+```
+
+---
+
+# 📂 RESULTADO
+
+Se vulnerável:
+
+```bash
+outputs/git/example.com/
+```
+
+Com arquivos:
+
+```bash
+HEAD
+config
+index
+```
+
+---
