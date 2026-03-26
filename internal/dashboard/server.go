@@ -3,6 +3,7 @@ package dashboard
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/leomarqueseh/BlueGuard/internal/core"
@@ -13,9 +14,17 @@ import (
 	"github.com/leomarqueseh/BlueGuard/internal/worker"
 )
 
+//
+// 🔹 Armazena resultados em memória (temporário)
+// Futuro: substituir por banco (SQLite)
+//
 var results []scanner.Finding
 
+//
+// 🚀 Start → inicia o dashboard web
+//
 func Start() {
+
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/scan", scanHandler)
 	http.HandleFunc("/results", resultsHandler)
@@ -24,7 +33,9 @@ func Start() {
 	http.ListenAndServe(":8080", nil)
 }
 
-// HOME
+//
+// 🏠 HOME → tela inicial com formulário
+//
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	html := `
@@ -32,6 +43,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 <html>
 <head>
 <title>BlueGuard</title>
+
 <style>
 body {
 	background:#0d1117;
@@ -44,6 +56,7 @@ input {
 	width:320px;
 	border-radius:6px;
 	border:none;
+	margin:5px;
 }
 button {
 	padding:12px;
@@ -53,15 +66,44 @@ button {
 	border-radius:6px;
 	cursor:pointer;
 }
+.box {
+	margin-top:20px;
+}
 </style>
+
 </head>
+
 <body>
 
 <h1>BlueGuard Scanner</h1>
 
 <form action="/scan">
-<input name="target" placeholder="https://example.com"/>
+
+<!-- 🔎 TARGET -->
+<input name="target" placeholder="https://example.com" required/>
+
+<!-- 🎛️ PLUGINS -->
+<div class="box">
+<h3>Plugins</h3>
+
+<label><input type="checkbox" name="plugins" value="openredirect"> Open Redirect</label><br>
+<label><input type="checkbox" name="plugins" value="headerexposure"> Header Exposure</label><br>
+<label><input type="checkbox" name="plugins" value="techfingerprint"> Tech Fingerprint</label><br>
+<label><input type="checkbox" name="plugins" value="gitexposed"> Git Exposed</label><br>
+<label><input type="checkbox" name="plugins" value="git_dump"> Git Dump</label><br>
+
+</div>
+
+<br>
+
+<!-- ❌ EXCLUDE -->
+<input name="exclude" placeholder="Excluir plugins (ex: headerexposure)"/>
+
+<br>
+
+<!-- 🚀 BOTÃO -->
 <button>Scan</button>
+
 </form>
 
 <br>
@@ -70,40 +112,77 @@ button {
 </body>
 </html>
 `
+
 	w.Write([]byte(html))
 }
 
-// SCAN
+//
+// 🔍 SCAN → executa o scanner
+//
 func scanHandler(w http.ResponseWriter, r *http.Request) {
 
+	// 🔹 pega target
 	target := r.URL.Query().Get("target")
 
+	// 🔹 contexto de scan
 	ctx := &core.ScanContext{
 		Timeout:   10 * time.Second,
 		UserAgent: "BlueGuard",
 		Client:    httpclient.New(10 * time.Second),
 	}
 
+	// 🔹 registry de plugins
 	reg := plugins.NewRegistry()
-	pool := worker.NewPool(reg.All(), 5, ctx)
+
+	// =============================
+	// 🔥 FILTRO DE PLUGINS
+	// =============================
+
+	// plugins selecionados (checkbox)
+	selected := r.URL.Query()["plugins"]
+
+	// plugins excluídos
+	excludeRaw := r.URL.Query().Get("exclude")
+
+	exclude := []string{}
+	if excludeRaw != "" {
+		exclude = strings.Split(excludeRaw, ",")
+	}
+
+	// 🔥 aplica filtro
+	activePlugins := reg.GetFiltered(selected, exclude)
+
+	// =============================
+	// ⚙️ WORKER POOL
+	// =============================
+
+	pool := worker.NewPool(activePlugins, 5, ctx)
 
 	targets := []scanner.Target{
 		{URL: target},
 	}
 
+	// 🔥 executa scan
 	findings := pool.Run(r.Context(), targets)
+
+	// 🔥 aplica risk engine
 	findings = risk.New().Analyze(findings)
 
+	// 🔹 salva resultados
 	results = findings
 
+	// 🔹 redireciona
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
-// RESULTS (NESSUS STYLE)
+//
+// 📊 RESULTS → dashboard estilo Nessus
+//
 func resultsHandler(w http.ResponseWriter, r *http.Request) {
 
 	var high, medium, low, info int
 
+	// 🔹 conta severidades
 	for _, f := range results {
 		switch f.Severity {
 		case "HIGH":
@@ -117,6 +196,7 @@ func resultsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// 🔹 monta tabela
 	var rows string
 
 	for _, f := range results {
@@ -142,6 +222,7 @@ func resultsHandler(w http.ResponseWriter, r *http.Request) {
 `, f.Title, color, f.Severity, f.Score, f.Target, f.Target)
 	}
 
+	// 🔹 HTML final
 	html := fmt.Sprintf(`
 <!DOCTYPE html>
 <html>
@@ -158,7 +239,6 @@ body {
 	display:flex;
 }
 
-/* SIDEBAR */
 .sidebar {
 	width:220px;
 	background:#161b22;
@@ -175,18 +255,11 @@ body {
 	text-decoration:none;
 }
 
-/* MAIN */
 .main {
 	flex:1;
 	padding:30px;
 }
 
-/* TITLE */
-h1 {
-	margin-bottom:20px;
-}
-
-/* CARDS */
 .cards {
 	display:flex;
 	gap:20px;
@@ -205,7 +278,6 @@ h1 {
 .low { background:#58a6ff; }
 .info { background:#3fb950; }
 
-/* TABLE */
 table {
 	width:100%%;
 	border-collapse:collapse;
@@ -225,7 +297,6 @@ td {
 tr:hover {
 	background:#21262d;
 }
-
 a {
 	color:#58a6ff;
 	text-decoration:none;

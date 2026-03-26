@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings" // 🔥 necessário para parse de plugins
 	"time"
 
 	"github.com/leomarqueseh/BlueGuard/internal/core"
@@ -21,7 +22,9 @@ import (
 	"github.com/leomarqueseh/BlueGuard/internal/worker"
 )
 
-// 🔹 Carregar targets de arquivo
+//
+// 🔹 Carrega múltiplos targets a partir de arquivo
+//
 func loadTargets(file string) ([]scanner.Target, error) {
 
 	var targets []scanner.Target
@@ -51,36 +54,59 @@ func loadTargets(file string) ([]scanner.Target, error) {
 
 func main() {
 
-	// 🔹 Flags
+	// =============================
+	// 🎯 FLAGS CLI
+	// =============================
+
 	target := flag.String("u", "", "Target URL")
 	list := flag.String("l", "", "Targets list file")
 	domain := flag.String("d", "", "Domain for discovery")
+
 	workers := flag.Int("w", 10, "Workers")
 	timeout := flag.Int("timeout", 10, "Timeout seconds")
 	userAgent := flag.String("ua", "BlueGuard", "User-Agent")
+
 	lang := flag.String("lang", "en", "Language (en|pt-BR)")
+
 	jsonOutput := flag.Bool("json", false, "Output JSON")
 	htmlOutput := flag.String("html", "", "Output HTML file")
+
 	web := flag.Bool("web", false, "Start web dashboard")
+
+	// 🔥 NOVO → controle de plugins
+	pluginsFlag := flag.String("plugins", "", "Plugins específicos (ex: git_dump,gitexposed)")
+	excludeFlag := flag.String("exclude", "", "Plugins para excluir")
 
 	flag.Parse()
 
-	// 🔥 Dashboard mode
+	// =============================
+	// 🌐 DASHBOARD MODE
+	// =============================
+
 	if *web {
 		dashboard.Start()
 		return
 	}
 
-	// 🔥 idioma
+	// =============================
+	// 🌍 IDIOMA
+	// =============================
+
 	i18n.Lang = *lang
 
-	// 🔴 validação
+	// =============================
+	// 🔴 VALIDAÇÃO DE ENTRADA
+	// =============================
+
 	if *target == "" && *list == "" && *domain == "" {
 		fmt.Println("Use -u OR -l OR -d")
 		return
 	}
 
-	// 🔥 contexto
+	// =============================
+	// 🔧 CONTEXTO DE SCAN
+	// =============================
+
 	scanCtx := &core.ScanContext{
 		Timeout:   time.Duration(*timeout) * time.Second,
 		UserAgent: *userAgent,
@@ -92,12 +118,18 @@ func main() {
 
 	var targets []scanner.Target
 
-	// 🔹 target único
+	// =============================
+	// 🎯 TARGET ÚNICO
+	// =============================
+
 	if *target != "" {
 		targets = append(targets, scanner.Target{URL: *target})
 	}
 
-	// 🔹 lista
+	// =============================
+	// 📂 LISTA DE TARGETS
+	// =============================
+
 	if *list != "" {
 		fileTargets, err := loadTargets(*list)
 		if err != nil {
@@ -107,7 +139,10 @@ func main() {
 		targets = append(targets, fileTargets...)
 	}
 
-	// 🔹 descoberta
+	// =============================
+	// 🔍 DISCOVERY (SUBDOMÍNIOS)
+	// =============================
+
 	if *domain != "" {
 
 		fmt.Println("[*] Discovering subdomains...")
@@ -121,21 +156,52 @@ func main() {
 		fmt.Println("[*] Found:", len(discovered))
 	}
 
-	// 🔥 plugins
+	// =============================
+	// 🔌 REGISTRY + FILTRO DE PLUGINS
+	// =============================
+
 	reg := plugins.NewRegistry()
-	fmt.Println("[*] Plugins loaded:", len(reg.All()))
 
-	// 🔥 worker
-	pool := worker.NewPool(reg.All(), *workers, scanCtx)
+	// 🔥 parse dos plugins
+	includePlugins := []string{}
+	excludePlugins := []string{}
 
-	// 🔥 scan
+	if *pluginsFlag != "" {
+		includePlugins = strings.Split(*pluginsFlag, ",")
+	}
+
+	if *excludeFlag != "" {
+		excludePlugins = strings.Split(*excludeFlag, ",")
+	}
+
+	// 🔥 aplica filtro
+	activePlugins := reg.GetFiltered(includePlugins, excludePlugins)
+
+	fmt.Println("[*] Plugins ativos:", len(activePlugins))
+
+	// =============================
+	// ⚙️ WORKER POOL
+	// =============================
+
+	pool := worker.NewPool(activePlugins, *workers, scanCtx)
+
+	// =============================
+	// 🚀 EXECUÇÃO DO SCAN
+	// =============================
+
 	findings := pool.Run(ctx, targets)
 
-	// 🔥 risk + score
+	// =============================
+	// 📊 RISK ENGINE (SCORING)
+	// =============================
+
 	riskEngine := risk.New()
 	findings = riskEngine.Analyze(findings)
 
-	// 🔹 JSON
+	// =============================
+	// 📦 OUTPUT JSON
+	// =============================
+
 	if *jsonOutput {
 		out, err := json.MarshalIndent(findings, "", "  ")
 		if err != nil {
@@ -146,7 +212,10 @@ func main() {
 		return
 	}
 
-	// 🔹 HTML
+	// =============================
+	// 📄 OUTPUT HTML
+	// =============================
+
 	if *htmlOutput != "" {
 		err := report.GenerateHTML(findings, *htmlOutput)
 		if err != nil {
@@ -158,7 +227,10 @@ func main() {
 		return
 	}
 
-	// 🔹 output padrão
+	// =============================
+	// 📟 OUTPUT PADRÃO
+	// =============================
+
 	for _, f := range findings {
 
 		fmt.Printf(
