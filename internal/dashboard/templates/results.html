@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BlueGuard Dashboard</title>
+
+<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+
+<style>
+body {
+    margin:0;
+    background:#0b1220;
+    color:#fff;
+    font-family:Arial;
+}
+
+.header {
+    padding:20px;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.cards {
+    display:flex;
+    gap:20px;
+    padding:20px;
+}
+
+.card {
+    flex:1;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.high { background:#ff4d4f; }
+.medium { background:#faad14; }
+.low { background:#1890ff; }
+.info { background:#52c41a; }
+
+#graph {
+    height:500px;
+    margin:20px;
+    background:#111827;
+    border-radius:10px;
+}
+
+table {
+    width:95%;
+    margin:20px;
+    border-collapse:collapse;
+}
+
+th, td {
+    padding:12px;
+    border-bottom:1px solid #333;
+}
+</style>
+
+</head>
+<body>
+
+<div class="header">BlueGuard Dashboard</div>
+
+<div class="cards">
+    <div class="card high">HIGH {{.High}}</div>
+    <div class="card medium">MEDIUM {{.Medium}}</div>
+    <div class="card low">LOW {{.Low}}</div>
+    <div class="card info">INFO {{.Info}}</div>
+</div>
+
+<h2 style="padding-left:20px;">Vulnerabilities</h2>
+
+<table>
+<tr>
+<th>Title</th>
+<th>Severity</th>
+<th>Score</th>
+<th>Target</th>
+</tr>
+
+{{range .Findings}}
+<tr>
+<td>{{.Title}}</td>
+<td>{{.Severity}}</td>
+<td>{{.Score}}</td>
+<td>{{.Target}}</td>
+</tr>
+{{end}}
+
+</table>
+
+<h2 style="padding-left:20px;">Recon Map</h2>
+
+<div id="graph"></div>
+
+<script>
+var cy = cytoscape({
+  container: document.getElementById('graph'),
+
+  elements: {
+    nodes: {{.Nodes}},
+    edges: {{.Edges}}
+  },
+
+  style: [
+    { selector: 'node[type="domain"]', style: { 'background-color': '#ff4d4f', 'label': 'data(label)' }},
+    { selector: 'node[type="subdomain"]', style: { 'background-color': '#1890ff', 'label': 'data(label)' }},
+    { selector: 'node[type="ip"]', style: { 'background-color': '#faad14', 'label': 'data(label)' }},
+    { selector: 'node[type="port"]', style: { 'background-color': '#52c41a', 'label': 'data(label)' }},
+    { selector: 'node[type="version"]', style: { 'background-color': '#722ed1', 'label': 'data(label)' }},
+    { selector: 'edge', style: { 'width': 2, 'line-color': '#999' }}
+  ],
+
+  layout: {
+    name: 'cose',
+    animate: true
+  }
+});
+</script>
+
+</body>
+</html>
