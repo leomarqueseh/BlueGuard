@@ -6,6 +6,10 @@ blueguard
 *.so
 *.dylib
 
+# build
+/dist/
+/build/
+
 # Go build
 *.out
 *.test

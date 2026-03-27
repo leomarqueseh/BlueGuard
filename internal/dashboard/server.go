@@ -1,40 +1,36 @@
 package dashboard
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/leomarqueseh/BlueGuard/internal/core"
 	"github.com/leomarqueseh/BlueGuard/internal/httpclient"
 	"github.com/leomarqueseh/BlueGuard/internal/plugins"
+	"github.com/leomarqueseh/BlueGuard/internal/recon"
 	"github.com/leomarqueseh/BlueGuard/internal/risk"
 	"github.com/leomarqueseh/BlueGuard/internal/scanner"
 	"github.com/leomarqueseh/BlueGuard/internal/worker"
 )
 
-//
-// 🔹 Armazena resultados em memória (temporário)
-// Futuro: substituir por banco (SQLite)
-//
+// 🔥 armazenamento temporário (futuro: banco)
 var results []scanner.Finding
 
-//
-// 🚀 Start → inicia o dashboard web
-//
+// 🚀 inicia servidor
 func Start() {
-
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/scan", scanHandler)
 	http.HandleFunc("/results", resultsHandler)
+	http.HandleFunc("/recon", reconHandler)
 
 	fmt.Println("[+] Dashboard running at http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
 
 //
-// 🏠 HOME → tela inicial com formulário
+// 🏠 HOME (ESTILO SaaS MODERNO)
 //
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -42,72 +38,159 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>BlueGuard</title>
 
 <style>
 body {
-	background:#0d1117;
-	color:#c9d1d9;
+	margin:0;
+	height:100vh;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	background: radial-gradient(circle at top,#0f172a,#020617);
 	font-family:Arial;
+	color:#fff;
+}
+
+.container {
 	text-align:center;
+	width:100%;
+	max-width:700px;
 }
-input {
-	padding:12px;
-	width:320px;
-	border-radius:6px;
-	border:none;
-	margin:5px;
+
+.logo {
+	font-size:48px;
+	font-weight:bold;
+	margin-bottom:10px;
 }
-button {
-	padding:12px;
-	background:#238636;
-	color:white;
+
+.subtitle {
+	color:#94a3b8;
+	margin-bottom:40px;
+}
+
+.input-group {
+	display:flex;
+	background:#111827;
+	border-radius:50px;
+	padding:5px;
+	box-shadow:0 0 20px rgba(34,197,94,0.2);
+}
+
+.input-group input {
+	flex:1;
+	padding:18px;
 	border:none;
-	border-radius:6px;
+	outline:none;
+	background:transparent;
+	color:#fff;
+	font-size:16px;
+}
+
+.input-group button {
+	background:#22c55e;
+	border:none;
+	padding:0 25px;
+	border-radius:50px;
+	color:#fff;
+	font-weight:bold;
 	cursor:pointer;
 }
-.box {
-	margin-top:20px;
+
+.plugins {
+	margin-top:40px;
+	text-align:left;
+}
+
+.plugin-item {
+	display:flex;
+	align-items:center;
+	gap:10px;
+	margin-bottom:10px;
+}
+
+.plugin-item input {
+	appearance:none;
+	width:18px;
+	height:18px;
+	border:2px solid #22c55e;
+	border-radius:4px;
+	cursor:pointer;
+}
+
+.plugin-item input:checked {
+	background:#22c55e;
+}
+
+.plugin-item input:checked::after {
+	content:"✓";
+	position:absolute;
+	color:#000;
+	font-size:12px;
+	top:-2px;
+	left:3px;
+}
+
+.footer {
+	margin-top:40px;
+	color:#64748b;
 }
 </style>
-
 </head>
 
 <body>
 
-<h1>BlueGuard Scanner</h1>
+<div class="container">
+
+<div class="logo">🛡️ BlueGuard</div>
+<div class="subtitle">Next-gen vulnerability scanner</div>
 
 <form action="/scan">
 
-<!-- 🔎 TARGET -->
-<input name="target" placeholder="https://example.com" required/>
+<div class="input-group">
+	<input name="target" placeholder="https://example.com" required>
+	<button>Scan</button>
+</div>
 
-<!-- 🎛️ PLUGINS -->
-<div class="box">
+<div class="plugins">
+
 <h3>Plugins</h3>
 
-<label><input type="checkbox" name="plugins" value="openredirect"> Open Redirect</label><br>
-<label><input type="checkbox" name="plugins" value="headerexposure"> Header Exposure</label><br>
-<label><input type="checkbox" name="plugins" value="techfingerprint"> Tech Fingerprint</label><br>
-<label><input type="checkbox" name="plugins" value="gitexposed"> Git Exposed</label><br>
-<label><input type="checkbox" name="plugins" value="git_dump"> Git Dump</label><br>
+<div class="plugin-item">
+<input type="checkbox" name="plugins" value="open_redirect" checked>
+<span>Open Redirect</span>
+</div>
+
+<div class="plugin-item">
+<input type="checkbox" name="plugins" value="header_exposure" checked>
+<span>Header Exposure</span>
+</div>
+
+<div class="plugin-item">
+<input type="checkbox" name="plugins" value="tech_fingerprint" checked>
+<span>Tech Fingerprint</span>
+</div>
+
+<div class="plugin-item">
+<input type="checkbox" name="plugins" value="git_exposed">
+<span>Git Exposed</span>
+</div>
+
+<div class="plugin-item">
+<input type="checkbox" name="plugins" value="git_dump">
+<span>Git Dump</span>
+</div>
 
 </div>
 
-<br>
-
-<!-- ❌ EXCLUDE -->
-<input name="exclude" placeholder="Excluir plugins (ex: headerexposure)"/>
-
-<br>
-
-<!-- 🚀 BOTÃO -->
-<button>Scan</button>
-
 </form>
 
-<br>
-<a href="/results">Ver resultados</a>
+<div class="footer">
+Secure • Fast • Modular
+</div>
+
+</div>
 
 </body>
 </html>
@@ -117,72 +200,42 @@ button {
 }
 
 //
-// 🔍 SCAN → executa o scanner
+// 🔍 SCAN
 //
 func scanHandler(w http.ResponseWriter, r *http.Request) {
 
-	// 🔹 pega target
 	target := r.URL.Query().Get("target")
 
-	// 🔹 contexto de scan
 	ctx := &core.ScanContext{
 		Timeout:   10 * time.Second,
 		UserAgent: "BlueGuard",
 		Client:    httpclient.New(10 * time.Second),
 	}
 
-	// 🔹 registry de plugins
 	reg := plugins.NewRegistry()
-
-	// =============================
-	// 🔥 FILTRO DE PLUGINS
-	// =============================
-
-	// plugins selecionados (checkbox)
-	selected := r.URL.Query()["plugins"]
-
-	// plugins excluídos
-	excludeRaw := r.URL.Query().Get("exclude")
-
-	exclude := []string{}
-	if excludeRaw != "" {
-		exclude = strings.Split(excludeRaw, ",")
-	}
-
-	// 🔥 aplica filtro
-	activePlugins := reg.GetFiltered(selected, exclude)
-
-	// =============================
-	// ⚙️ WORKER POOL
-	// =============================
-
-	pool := worker.NewPool(activePlugins, 5, ctx)
+	pool := worker.NewPool(reg.All(), 5, ctx)
 
 	targets := []scanner.Target{
 		{URL: target},
 	}
 
-	// 🔥 executa scan
 	findings := pool.Run(r.Context(), targets)
-
-	// 🔥 aplica risk engine
 	findings = risk.New().Analyze(findings)
 
-	// 🔹 salva resultados
 	results = findings
 
-	// 🔹 redireciona
-	http.Redirect(w, r, "/results", http.StatusSeeOther)
+	http.Redirect(w, r, "/results?target="+target, http.StatusSeeOther)
 }
 
 //
-// 📊 RESULTS → dashboard estilo Nessus
+// 📊 RESULTS + RECON MAP
 //
 func resultsHandler(w http.ResponseWriter, r *http.Request) {
 
+	target := r.URL.Query().Get("target")
+
 	var high, medium, low, info int
 
-	// 🔹 conta severidades
 	for _, f := range results {
 		switch f.Severity {
 		case "HIGH":
@@ -196,136 +249,60 @@ func resultsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// 🔹 monta tabela
 	var rows string
 
 	for _, f := range results {
-
-		color := "#3fb950"
-
-		switch f.Severity {
-		case "HIGH":
-			color = "#f85149"
-		case "MEDIUM":
-			color = "#d29922"
-		case "LOW":
-			color = "#58a6ff"
-		}
-
 		rows += fmt.Sprintf(`
 <tr>
 <td>%s</td>
-<td><span style="color:%s;font-weight:bold;">%s</span></td>
+<td>%s</td>
 <td>%.1f</td>
-<td><a href="%s" target="_blank">%s</a></td>
+<td>%s</td>
 </tr>
-`, f.Title, color, f.Severity, f.Score, f.Target, f.Target)
+`, f.Title, f.Severity, f.Score, f.Target)
 	}
 
-	// 🔹 HTML final
 	html := fmt.Sprintf(`
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>BlueGuard Dashboard</title>
+<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
 
 <style>
-body {
-	margin:0;
-	font-family:Arial;
-	background:#0d1117;
-	color:#c9d1d9;
-	display:flex;
-}
-
-.sidebar {
-	width:220px;
-	background:#161b22;
-	height:100vh;
-	padding:20px;
-}
-.sidebar h2 {
-	color:#58a6ff;
-}
-.sidebar a {
-	display:block;
-	color:#c9d1d9;
-	margin:10px 0;
-	text-decoration:none;
-}
-
-.main {
-	flex:1;
-	padding:30px;
-}
-
-.cards {
-	display:flex;
-	gap:20px;
-	margin-bottom:30px;
-}
-.card {
-	flex:1;
-	padding:20px;
-	border-radius:10px;
-	text-align:center;
-	font-weight:bold;
-	font-size:18px;
-}
+body { background:#0d1117; color:#fff; font-family:Arial; }
+.container { padding:20px; }
+.cards { display:flex; gap:10px; }
+.card { flex:1; padding:20px; border-radius:10px; text-align:center; }
 .high { background:#f85149; }
 .medium { background:#d29922; }
 .low { background:#58a6ff; }
 .info { background:#3fb950; }
-
-table {
-	width:100%%;
-	border-collapse:collapse;
-	background:#161b22;
-	border-radius:10px;
-	overflow:hidden;
-}
-th {
-	background:#21262d;
-	padding:12px;
-	text-align:left;
-}
-td {
-	padding:12px;
-	border-bottom:1px solid #30363d;
-}
-tr:hover {
-	background:#21262d;
-}
-a {
-	color:#58a6ff;
-	text-decoration:none;
-}
+#cy { height:500px; margin-top:20px; }
+table { width:100%%; margin-top:20px; }
+td,th { padding:10px; border-bottom:1px solid #333; }
 </style>
 
 </head>
+
 <body>
 
-<div class="sidebar">
-	<h2>BlueGuard</h2>
-	<a href="/">🏠 Home</a>
-	<a href="/results">📊 Results</a>
-</div>
+<div class="container">
 
-<div class="main">
-
-<h1>Security Dashboard</h1>
+<h1>Dashboard</h1>
 
 <div class="cards">
-	<div class="card high">HIGH<br>%d</div>
-	<div class="card medium">MEDIUM<br>%d</div>
-	<div class="card low">LOW<br>%d</div>
-	<div class="card info">INFO<br>%d</div>
+<div class="card high">HIGH %d</div>
+<div class="card medium">MEDIUM %d</div>
+<div class="card low">LOW %d</div>
+<div class="card info">INFO %d</div>
 </div>
+
+<h2>Vulnerabilities</h2>
 
 <table>
 <tr>
-<th>Vulnerability</th>
+<th>Title</th>
 <th>Severity</th>
 <th>Score</th>
 <th>Target</th>
@@ -333,11 +310,44 @@ a {
 %s
 </table>
 
+<h2>Recon Map</h2>
+<div id="cy"></div>
+
 </div>
+
+<script>
+async function loadRoot(){
+	const res = await fetch("/recon?target=%s");
+	const data = await res.json();
+
+	let cy = cytoscape({
+		container: document.getElementById('cy'),
+		elements: data.nodes.map(n=>({data:{id:n.id,label:n.label,type:n.type}}))
+			.concat(data.edges.map(e=>({data:{source:e.source,target:e.target}}))),
+		style: [{selector:'node',style:{'label':'data(label)','color':'#fff'}}],
+		layout: { name: 'cose' }
+	});
+}
+loadRoot();
+</script>
 
 </body>
 </html>
-`, high, medium, low, info, rows)
+`, high, medium, low, info, rows, target)
 
 	w.Write([]byte(html))
+}
+
+//
+// 🌐 RECON API
+//
+func reconHandler(w http.ResponseWriter, r *http.Request) {
+
+	target := r.URL.Query().Get("target")
+
+	asset := recon.Discover(target)
+	graph := recon.BuildGraph(asset)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(graph)
 }
