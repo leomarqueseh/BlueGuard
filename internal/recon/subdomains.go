@@ -1,9 +1,11 @@
 package recon
 
-// 🔍 Descoberta simples (mock inicial)
+// 🔥 Discover subdomínios (simples por enquanto)
 func Discover(domain string) Asset {
 
-	// ⚠️ depois você pluga subfinder aqui
+	// 🔥 limpar domínio (evita bug tipo http://api.example.com)
+	domain = cleanDomain(domain)
+
 	subs := []string{
 		"www." + domain,
 		"api." + domain,

@@ -1,23 +1,28 @@
 package recon
 
-// 🔥 Estrutura principal
+// 🔥 Asset representa o alvo analisado
 type Asset struct {
-	Domain     string
-	Subdomains []string
+	Domain     string   // domínio principal
+	Subdomains []string // subdomínios encontrados
+	IPs        []string // IPs (opcional)
 }
 
-// 🔥 Grafo (mapa mental)
+// 🔥 Node do grafo (Cytoscape)
 type Node struct {
-	ID    string `json:"id"`
-	Label string `json:"label"`
-	Type  string `json:"type"`
+	ID         string `json:"id"`
+	Label      string `json:"label"`
+	Type       string `json:"type"`
+	Parent     string `json:"parent,omitempty"`
+	Expandable bool   `json:"expandable"`
 }
 
+// 🔥 Edge (ligação entre nós)
 type Edge struct {
 	Source string `json:"source"`
 	Target string `json:"target"`
 }
 
+// 🔥 Graph completo enviado para o frontend
 type Graph struct {
 	Nodes []Node `json:"nodes"`
 	Edges []Edge `json:"edges"`
