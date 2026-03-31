@@ -1,203 +1,185 @@
-# 🛡️ BlueGuard
+🛡️ BlueGuard
 
-BlueGuard é um scanner de vulnerabilidades modular desenvolvido em Go, inspirado em ferramentas profissionais como Nessus.
+BlueGuard é um scanner de vulnerabilidades modular desenvolvido em Go, inspirado em ferramentas como o Nessus.
 
-Projetado para ser rápido, extensível e fácil de evoluir, o BlueGuard utiliza arquitetura baseada em plugins e execução concorrente para análise de segurança em aplicações web.
+Projetado para ser rápido, extensível e moderno, o BlueGuard combina:
 
----
-
-## 🚀 Features
-
-- 🔌 Arquitetura baseada em plugins
-- ⚡ Execução concorrente (worker pool)
-- 🌐 Dashboard web integrado (estilo SaaS)
-- 📊 Risk Engine (classificação de severidade e score)
-- 🔍 Recon (descoberta de subdomínios)
-- 📄 Saída em JSON e HTML
-- 🎯 Controle de plugins via CLI e Dashboard
-
----
-
-## 🧩 Plugins Disponíveis
-
-| Plugin            | Descrição |
-|------------------|----------|
-| openredirect     | Detecta possíveis redirecionamentos abertos |
-| headerexposure   | Identifica headers sensíveis expostos |
-| techfingerprint  | Detecta tecnologias (Server, WAF, etc) |
-| gitexposed       | Verifica se `.git` está exposto |
-| git_dump         | Reconstrói repositório Git remoto (avançado) |
-
----
-
-## ⚙️ Instalação
-
-```bash
+🔍 Reconhecimento de superfície (recon)
+🔌 Arquitetura baseada em plugins
+⚡ Execução concorrente
+🌐 Dashboard web interativo estilo SaaS
+🚀 Features
+🔌 Sistema de plugins extensível
+⚡ Worker pool (alta performance)
+🌐 Dashboard web integrado
+📊 Risk Engine (score + severidade)
+🔍 Recon (subdomínios + IP + portas via Nmap)
+🧠 Mapa mental interativo (estilo Maltego)
+📄 Output:
+CLI detalhado
+JSON
+HTML
+🎯 Controle total de plugins via CLI
+🧩 Plugins Disponíveis
+Plugin	Descrição
+openredirect	Detecta redirecionamentos abertos
+headerexposure	Headers sensíveis expostos
+techfingerprint	Tecnologias (Server, WAF, etc)
+gitexposed	Verifica exposição do .git
+git_dump	Reconstrói repositório Git remoto
+⚙️ Instalação
 git clone https://github.com/leomarqueseh/BlueGuard.git
 cd BlueGuard
 
 go mod tidy
 go build -o blueguard ./cmd/blueguard
-````
-
----
-
-## ▶️ Uso
-
-### 🔹 Scan básico
-
-```bash
+▶️ Uso
+🔹 Scan básico
 ./blueguard -u https://example.com
-```
-
----
-
-### 🔹 Scan seguro (RECOMENDADO)
-
-```bash
-./blueguard -u http://testphp.vulnweb.com -exclude git_dump,gitexposed
-```
-
----
-
-### 🔹 Selecionar plugins
-
-```bash
+🔹 Scan seguro (RECOMENDADO)
+./blueguard -u http://testphp.vulnweb.com -exclude git_dump,git_exposed
+🔹 Selecionar plugins específicos
 ./blueguard -u https://target.com -plugins openredirect,techfingerprint
-```
-
----
-
-### 🔹 Lista de targets
-
-```bash
+🔹 Lista de targets
 ./blueguard -l targets.txt
-```
-
----
-
-### 🔹 Descoberta de subdomínios
-
-```bash
+🔹 Recon (subdomínios + expansão)
 ./blueguard -d example.com
-```
-
----
-
-### 🔹 Output JSON
-
-```bash
+🔹 Output JSON
 ./blueguard -u https://example.com -json
-```
-
----
-
-### 🔹 Relatório HTML
-
-```bash
+🔹 Relatório HTML
 ./blueguard -u https://example.com -html report.html
-```
-
----
-
-### 🌐 Dashboard Web
-
-```bash
+🌐 Dashboard Web
 ./blueguard -web
-```
 
 Acesse:
 
-```
 http://localhost:8080
-```
+✔ Interface inclui:
+🎩 Logo hacker (chapéu + óculos)
+🔌 Seleção de plugins
+📊 Cards de severidade
+📋 Tabela de vulnerabilidades
+🧠 Recon Map interativo
+🧠 Sistema de Plugins
 
-✔ Interface estilo Nessus
-✔ Seleção de plugins
-✔ Visualização de resultados
+Interface padrão:
 
----
-
-## 🧠 Arquitetura
-
-```
-cmd/blueguard/main.go → EntryPoint
-
-internal/
-  core/        → contexto do scan
-  scanner/     → engine de execução
-  worker/      → concorrência
-  plugins/     → sistema de plugins
-  dashboard/   → interface web
-  httpclient/  → cliente HTTP custom
-  recon/       → descoberta
-  report/      → geração de relatórios
-  risk/        → análise de risco
-```
-
----
-
-## 🔥 Sistema de Plugins
-
-Cada plugin segue a interface:
-
-```go
 type Plugin interface {
     Name() string
     Run(ctx *core.ScanContext, target scanner.Target) ([]scanner.Finding, error)
 }
-```
 
-✔ Fácil de adicionar novos plugins
-✔ Modular e escalável
+✔ Plugável
+✔ Escalável
+✔ Fácil de expandir
 
----
+🎯 Controle de Plugins (CLI)
+🔥 Incluir plugins (whitelist)
+-plugins openredirect,techfingerprint
+🔥 Excluir plugins (blacklist)
+-exclude git_dump,git_exposed
+🧠 Regra:
+-plugins tem prioridade sobre -exclude
+🧠 Recon Engine
 
-## ⚠️ Segurança & Uso Responsável
+Inspirado em ferramentas como:
 
-Este projeto é destinado **exclusivamente para fins educacionais e testes autorizados**.
+Subfinder
+Assetfinder
+Nmap
+🔥 Coleta:
+Domínio
+Subdomínios
+IPs (DNS resolve)
+Portas abertas
+Serviços
+Versões
+🧠 Grafo Inteligente (Dashboard)
 
-🚫 Não utilize em sistemas sem permissão
-🚫 Não execute plugins agressivos em ambientes de produção
+Estrutura:
 
-Ambiente recomendado para testes:
+example.com
+ ├── subdomains
+ │    ├── api.example.com
+ │    ├── dev.example.com
+ │
+ ├── IP
+ │    ├── 1.1.1.1
+ │         ├── 80/http
+ │         ├── 443/https
+ │
+ ├── Tech
+ │    ├── nginx
+ │    ├── PHP
 
-* [http://testphp.vulnweb.com](http://testphp.vulnweb.com)
+✔ Expansão por clique
+✔ Lazy loading (/expand)
+✔ Estilo Maltego
 
----
+📊 Relatórios (IMPORTANTE)
 
-## 🧠 Roadmap
+Mesmo quando nenhuma vulnerabilidade é encontrada, o BlueGuard gera:
 
-* [ ] Scan Profiles (safe / full / aggressive)
-* [ ] Crawler automático
-* [ ] Fuzzing de parâmetros
-* [ ] Fingerprint avançado (WAF, CMS, frameworks)
-* [ ] Histórico de scans (SQLite)
-* [ ] Exportação de relatórios (ZIP)
-* [ ] UI SaaS premium
+✔ Informações coletadas
+✔ Superfície de ataque
+✔ Serviços expostos
+✔ Recomendações de segurança
 
----
+Exemplo:
+Verificar headers de segurança
+Ocultar versão do servidor
+Restringir acesso a .git
+Fechar portas desnecessárias
+⚠️ Segurança & Uso Responsável
 
-## 🤝 Contribuição
+Este projeto é destinado para:
 
-Pull requests são bem-vindos!
+✔ Testes autorizados
+✔ Estudos de segurança
+✔ Laboratórios
 
-Para mudanças grandes:
+🚫 NÃO use sem permissão
+🚫 NÃO execute plugins agressivos em produção
 
-1. Crie uma branch
-2. Faça commits claros
-3. Abra um PR
+🧠 Arquitetura
+cmd/blueguard/main.go
 
----
+internal/
+  core/
+  scanner/
+  worker/
+  plugins/
+  dashboard/
+  httpclient/
+  recon/
+  report/
+  risk/
+🧠 Roadmap
+ Scan Profiles (safe / full / aggressive)
+ Crawler automático
+ Fuzzing de parâmetros
+ Fingerprint avançado (WAF/CMS)
+ Persistência (SQLite)
+ Export ZIP
+ Execução assíncrona
+ UI SaaS nível premium
+🤝 Contribuição
 
-## 📄 Licença
+Pull requests são bem-vindos.
+
+Fluxo recomendado:
+
+git checkout -b feature/nova-feature
+git commit -m "feat: descrição"
+git push origin feature/nova-feature
+📄 Licença
 
 MIT License
 
----
+⭐ Projeto em evolução
 
-## ⭐ Projeto em evolução
+BlueGuard está evoluindo para se tornar uma plataforma completa combinando:
 
-BlueGuard está em constante evolução rumo a um scanner completo de segurança.
-
-
+Scanner → Nessus
+Recon visual → Maltego
+Exploração → Burp Suite
