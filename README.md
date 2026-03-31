@@ -178,8 +178,3 @@ MIT License
 
 ⭐ Projeto em evolução
 
-BlueGuard está evoluindo para se tornar uma plataforma completa combinando:
-
-Scanner → Nessus
-Recon visual → Maltego
-Exploração → Burp Suite
