@@ -1,4 +1,4 @@
-Markdown
+```markdown
 <h1 align="center">
   <br>
   🛡️ BlueGuard
@@ -51,7 +51,19 @@ go mod tidy
 
 # Compile o binário
 go build -o blueguard ./cmd/blueguard
-▶️ Como UsarO BlueGuard oferece controle total através de sua interface de linha de comando (CLI).Scans Básicos e AvançadosBash# Scan básico
+
+```
+
+---
+
+## ▶️ Como Usar
+
+O BlueGuard oferece controle total através de sua interface de linha de comando (CLI).
+
+### Scans Básicos e Avançados
+
+```bash
+# Scan básico
 ./blueguard -u [https://example.com](https://example.com)
 
 # Scan seguro (Evita execução de plugins destrutivos ou agressivos - RECOMENDADO)
@@ -65,17 +77,69 @@ go build -o blueguard ./cmd/blueguard
 
 # Reconhecimento focado (Subdomínios + Expansão)
 ./blueguard -d example.com
-Exportação de RelatóriosMesmo quando nenhuma vulnerabilidade crítica é encontrada, o BlueGuard gera relatórios sobre a superfície de ataque, serviços expostos e recomendações de hardening.Bash# Output em JSON (Ideal para integração com pipelines CI/CD)
+
+```
+
+### Exportação de Relatórios
+
+Mesmo quando nenhuma vulnerabilidade crítica é encontrada, o BlueGuard gera relatórios sobre a superfície de ataque, serviços expostos e recomendações de *hardening*.
+
+```bash
+# Output em JSON (Ideal para integração com pipelines CI/CD)
 ./blueguard -u [https://example.com](https://example.com) -json
 
 # Gerar relatório visual em HTML
 ./blueguard -u [https://example.com](https://example.com) -html report.html
-🌐 Dashboard Web IntegradoInicie a interface web interativa para uma experiência visual completa:Bash./blueguard -web
-Acesse http://localhost:8080 no seu navegador para visualizar:Painel de seleção e controle de plugins.Cards consolidados de severidade.Recon Map: Grafo interativo para exploração da superfície de ataque (expansão por clique, lazy loading).🧩 Arquitetura e PluginsO BlueGuard foi estruturado para ser altamente modular.Interface de PluginDesenvolver um novo plugin exige apenas a implementação de uma interface simples no Go:Gotype Plugin interface {
+
+```
+
+### 🌐 Dashboard Web Integrado
+
+Inicie a interface web interativa para uma experiência visual completa:
+
+```bash
+./blueguard -web
+
+```
+
+Acesse `http://localhost:8080` no seu navegador para visualizar:
+
+* Painel de seleção e controle de plugins.
+* Cards consolidados de severidade.
+* **Recon Map:** Grafo interativo para exploração da superfície de ataque (expansão por clique, *lazy loading*).
+
+---
+
+## 🧩 Arquitetura e Plugins
+
+O BlueGuard foi estruturado para ser altamente modular.
+
+### Interface de Plugin
+
+Desenvolver um novo plugin exige apenas a implementação de uma interface simples no Go:
+
+```go
+type Plugin interface {
     Name() string
     Run(ctx *core.ScanContext, target scanner.Target) ([]scanner.Finding, error)
 }
-Plugins DisponíveisPluginDescriçãoopenredirectDetecta falhas de redirecionamento aberto.headerexposureIdentifica exposição de cabeçalhos sensíveis.techfingerprintMapeia tecnologias utilizadas (Servidores web, WAFs, CMS, etc).gitexposedVerifica a exposição indevida do diretório .git.git_dumpReconstrói e faz o dump de repositórios Git remotos expostos.Estrutura do ProjetoPlaintext.
+
+```
+
+### Plugins Disponíveis
+
+| Plugin | Descrição |
+| --- | --- |
+| `openredirect` | Detecta falhas de redirecionamento aberto. |
+| `headerexposure` | Identifica exposição de cabeçalhos sensíveis. |
+| `techfingerprint` | Mapeia tecnologias utilizadas (Servidores web, WAFs, CMS, etc). |
+| `gitexposed` | Verifica a exposição indevida do diretório `.git`. |
+| `git_dump` | Reconstrói e faz o dump de repositórios Git remotos expostos. |
+
+### Estrutura do Projeto
+
+```text
+.
 ├── cmd/
 │   └── blueguard/main.go    # Entrypoint da aplicação
 ├── internal/
@@ -88,4 +152,40 @@ Plugins DisponíveisPluginDescriçãoopenredirectDetecta falhas de redirecioname
 │   ├── recon/               # Módulos de reconhecimento e enumeração
 │   ├── report/              # Geração de saídas (JSON, HTML)
 │   └── risk/                # Engine de pontuação de risco
-🧠 Roadmap[ ] Scan Profiles predefinidos (safe, full, aggressive).[ ] Crawler automático para mapeamento de rotas.[ ] Fuzzing inteligente de parâmetros.[ ] Fingerprint avançado para evasão de WAF e detecção de CMS.[ ] Persistência de dados (Integração com SQLite).[ ] Exportação completa de projetos em .ZIP.[ ] UI SaaS Premium (Melhorias no layout do dashboard).🤝 Como ContribuirPull requests são muito bem-vindos. Para mudanças importantes, abra uma issue primeiro para discutir o que você gostaria de alterar.Faça um Fork do projeto.Crie uma branch para sua feature: git checkout -b feature/nova-featureFaça o commit de suas alterações: git commit -m 'feat: Adicionando nova funcionalidade'Faça o Push para a branch: git push origin feature/nova-featureAbra um Pull Request.⚠️ Aviso LegalEste projeto foi desenvolvido exclusivamente para fins educacionais e testes de segurança autorizados. O autor não se responsabiliza pelo mau uso da ferramenta.🚫 NÃO utilize em alvos sem o consentimento explícito dos proprietários.🚫 NÃO execute plugins agressivos em ambientes de produção.2. Estratégia de Divulgação no LinkedInPara atrair a atenção de recrutadores e da comunidade de InfoSec, o ideal é focar nos desafios técnicos que você resolveu com o Go e na utilidade da ferramenta.Modelo de Postagem:🚀 Apresentando o BlueGuard: Um scanner de vulnerabilidades modular e de alta performance.Durante meus estudos em segurança ofensiva e desenvolvimento de ferramentas, percebi a necessidade de um scanner que unisse a velocidade das rotinas concorrentes do #Golang com uma interface intuitiva para análise visual de superfície de ataque.Foi assim que nasceu o BlueGuard. 🛡️Principais desafios e implementações técnicas:⚡ Worker Pools em Go: Arquitetura para garantir concorrência agressiva e alta performance sem estourar recursos de rede.🔌 Sistema de Plugins: Desenvolvi uma interface extensível (interface{}) onde qualquer pessoa pode criar módulos de detecção (ex: Open Redirect, Git Dump, Header Exposure).🌐 Dashboard & Grafo Inteligente: Não basta apenas gerar logs no terminal. Integrei um painel web que desenha a superfície de ataque em um mapa interativo (estilo Maltego).O projeto é 100% focado em testes autorizados, estudos de segurança e Bug Bounty.Gostaria do feedback da comunidade! Como vocês organizam a automação do fluxo de recon e scanning de vocês?🔗 Repositório no GitHub: [Insira o link aqui]#CyberSecurity #Golang #AppSec #RedTeam #BugBounty #InfoSec #OpenSource #DevSecOps
+
+```
+
+---
+
+## 🧠 Roadmap
+
+* [ ] Scan Profiles predefinidos (`safe`, `full`, `aggressive`).
+* [ ] Crawler automático para mapeamento de rotas.
+* [ ] Fuzzing inteligente de parâmetros.
+* [ ] Fingerprint avançado para evasão de WAF e detecção de CMS.
+* [ ] Persistência de dados (Integração com SQLite).
+* [ ] Exportação completa de projetos em `.ZIP`.
+* [ ] UI SaaS Premium (Melhorias no layout do dashboard).
+
+---
+
+## 🤝 Como Contribuir
+
+Pull requests são muito bem-vindos. Para mudanças importantes, abra uma *issue* primeiro para discutir o que você gostaria de alterar.
+
+1. Faça um Fork do projeto.
+2. Crie uma branch para sua feature: `git checkout -b feature/nova-feature`
+3. Faça o commit de suas alterações: `git commit -m 'feat: Adicionando nova funcionalidade'`
+4. Faça o Push para a branch: `git push origin feature/nova-feature`
+5. Abra um Pull Request.
+
+---
+
+## ⚠️ Aviso Legal
+
+Este projeto foi desenvolvido **exclusivamente para fins educacionais e testes de segurança autorizados**. O autor não se responsabiliza pelo mau uso da ferramenta.
+
+* 🚫 **NÃO** utilize em alvos sem o consentimento explícito dos proprietários.
+* 🚫 **NÃO** execute plugins agressivos em ambientes de produção.
+
+--
